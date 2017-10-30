@@ -25,18 +25,19 @@ data Tilemap = Tilemap
 
 data Tile = Sky | Grass
 
-initialWorld :: World
-initialWorld = World
+mkWorld :: Tilemap -> World
+mkWorld tilemap = World
   { exiting = False
-  , tilemap = initialTilemap
+  , tilemap = tilemap
   }
 
-initialTilemap :: Tilemap
-initialTilemap = Tilemap
-    { tiles =  [[(0, 0, Sky), (1, 0, Sky), (2, 0, Grass)] 
-               ,[(0, 1, Sky), (1, 1, Sky), (2, 1, Grass)]
-               ,[(0, 2, Sky), (1, 2, Grass),  (2, 2, Grass)]]
-    }
+loadTilemap :: String -> Tilemap
+loadTilemap s = Tilemap $ map (map toTile) (lines s) 
+
+toTile :: Char -> (Int, Int, Tile)
+toTile 'x' = (1,1,Sky)
+toTile 'g' = (0,0,Grass)
+
 
 main :: IO ()
 main = C.withSDL $ C.withSDLImage $ do
@@ -47,13 +48,15 @@ main = C.withSDL $ C.withSDLImage $ do
 
       let doRender = renderWorld r t
 
+      tilemapString <- readFile "./assets/tiles.map"
+
       _ <- iterateUntilM
         exiting
         (\x ->
           updateWorld x <$> SDL.pollEvents
           >>= \x' -> x' <$ doRender x'
         )
-        initialWorld
+        (mkWorld (loadTilemap tilemapString))
 
       SDL.destroyTexture (fst t)
 
@@ -121,8 +124,8 @@ drawWorld renderer (texture, ti) world = do
       tileRect = C.mkRect 0 0 tileWidth tileWidth
 
       getTilesheetCoords :: (Num a) => Tile -> (a, a)
-      getTilesheetCoords Sky = (16, 16)
-      getTilesheetCoords Grass = (80, 16)
+      getTilesheetCoords Sky = (0, 0)
+      getTilesheetCoords Grass = (64, 0)
 
       renderTile (x, y, t)
         = SDL.copy renderer texture
