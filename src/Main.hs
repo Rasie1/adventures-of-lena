@@ -7,48 +7,63 @@ import qualified Common as C
 
 import Control.Monad.Loops    
 import Data.Foldable          
-
+import Data.Array
 
 data Intent
   = Idle
   | Quit
 
-
 data World = World
   { exiting :: Bool
-  , tilemap :: Tilemap
+  , level :: Level
   }
 
-data Tilemap = Tilemap
-    { tiles :: [[(Int, Int, Tile)]]
-    }
+data Level = Level
+    { tiles :: Array (Int, Int) Tile
+    } deriving Show
 
-data Tile = Sky | Grass
 
-mkWorld :: Tilemap -> World
-mkWorld tilemap = World
+data Tile = Sky | Grass deriving Show
+
+mkWorld :: Level -> World
+mkWorld lvl = World
   { exiting = False
-  , tilemap = tilemap
+  , level = lvl
   }
 
-loadTilemap :: String -> Tilemap
-loadTilemap s = Tilemap $ map (map toTile) (lines s) 
+loadLevel :: String -> Level
+loadLevel s = Level $ array ((0, 0), (len, len)) arrayElements
+            where 
+                  arrayElements :: [((Int, Int), Tile)]
+                  arrayElements = foldl f [] numberedRows
+                  
+                  numberedTiles :: [[(Int, Tile)]]
+                  numberedTiles = map (zip [0..] . map toTile) (lines s)
+                  
+                  numberedRows = zip [0..] numberedTiles
+                  
+                  f :: [((Int, Int), Tile)] -> (Int, [(Int, Tile)]) -> [((Int, Int), Tile)]
+                  f acc (i, xs) = map (g i) xs ++ acc
+                  
+                  g i (j, tile) = ((j, i), tile)
 
-toTile :: Char -> (Int, Int, Tile)
-toTile 'x' = (1,1,Sky)
-toTile 'g' = (0,0,Grass)
+                  len = length numberedTiles - 1
+
+toTile :: Char -> Tile
+toTile 'g' = Grass
+toTile _ = Sky
 
 
 main :: IO ()
 main = C.withSDL $ C.withSDLImage $ do
   C.setHintQuality
-  C.withWindow "Game" (640, 480) $ \w ->
+  C.withWindow "Game" (800, 600) $ \w ->
     C.withRenderer w $ \r -> do
       t <- C.loadTextureWithInfo r "./assets/tiles.png"
 
       let doRender = renderWorld r t
 
-      tilemapString <- readFile "./assets/tiles.map"
+      levelString <- readFile "./assets/tiles.map"
 
       _ <- iterateUntilM
         exiting
@@ -56,7 +71,7 @@ main = C.withSDL $ C.withSDLImage $ do
           updateWorld x <$> SDL.pollEvents
           >>= \x' -> x' <$ doRender x'
         )
-        (mkWorld (loadTilemap tilemapString))
+        (mkWorld (loadLevel levelString))
 
       SDL.destroyTexture (fst t)
 
@@ -115,9 +130,8 @@ renderWorld r t w = do
 
 drawWorld :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> World -> IO ()
 drawWorld renderer (texture, ti) world = do
-    forM_ (tiles $ tilemap world) $ \row ->
-        forM_ row $ \tile ->
-          renderTile tile
+    forM_ (assocs . tiles . level $ world) $ \((i, j), tile) ->
+      renderTile i j tile
     where
       tileWidth :: Double
       tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
@@ -127,7 +141,7 @@ drawWorld renderer (texture, ti) world = do
       getTilesheetCoords Sky = (0, 0)
       getTilesheetCoords Grass = (64, 0)
 
-      renderTile (x, y, t)
+      renderTile x y t
         = SDL.copy renderer texture
             (Just $ floor <$> tileRect `moveTo` getTilesheetCoords t)
             (Just $ floor <$> tileRect `moveTo` (fromIntegral x * tileWidth, fromIntegral y * tileWidth))
