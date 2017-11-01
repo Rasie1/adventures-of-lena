@@ -10,6 +10,7 @@ executable game
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   main-is:             Main.hs
   other-modules:       Common
+                       Level
   build-depends:       base
                      , sdl2
                      , sdl2-image
