@@ -7,6 +7,7 @@ import Level
 import qualified SDL
 import qualified Common as C
 
+import Control.Monad
 import Control.Monad.Loops    
 import Data.Foldable          
 import Data.Array
@@ -26,41 +27,42 @@ mkWorld lvl = World
   , level = lvl
   }
 
+
 main :: IO ()
 main = C.withSDL $ C.withSDLImage $ do
   C.setHintQuality
   C.withWindow "Game" (800, 600) $ \w ->
     C.withRenderer w $ \r -> do
       t <- C.loadTextureWithInfo r "./assets/tiles.png"
-
-      let doRender = renderWorld r t
-
-
       levelString <- readFile "./assets/tiles.map"
 
-      _ <- iterateUntilM
-        exiting
-        (\x ->
-          updateWorld x <$> SDL.pollEvents
-          >>= \x' -> x' <$ doRender x'
-        )
-        (mkWorld (loadLevel levelString))
+      let doRender = renderWorld r t
+      let initialWorld = mkWorld (loadLevel levelString)
+      let update x = updateWorld x <$> SDL.pollEvents
+                     >>= \x' -> x' <$ doRender x'
+
+      runApp update initialWorld
 
       SDL.destroyTexture (fst t)
 
+
+runApp :: (Monad m) => (World -> m World) -> World -> m ()
+runApp update = repeatUntil update exiting
+
+repeatUntil :: (Monad m) => (a -> m a) -> (a -> Bool) -> a -> m ()
+repeatUntil f p = go
+  where go a = f a >>= \b -> unless (p b) (go b)
 
 updateWorld :: World -> [SDL.Event] -> World
 updateWorld w
   = foldl' (flip applyIntent) w
   . fmap (payloadToIntent . SDL.eventPayload)
 
-
 payloadToIntent :: SDL.EventPayload -> Intent
 payloadToIntent SDL.QuitEvent            = Quit
 payloadToIntent (SDL.MouseMotionEvent e) = motionIntent e
 payloadToIntent (SDL.MouseButtonEvent e) = buttonIntent e
 payloadToIntent _                        = Idle
-
 
 motionIntent :: SDL.MouseMotionEventData -> Intent
 motionIntent _ = Idle
