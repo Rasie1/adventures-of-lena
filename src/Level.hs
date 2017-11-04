@@ -13,10 +13,13 @@ data Tile = Sky | Grass deriving Show
 
 
 loadLevel :: String -> Level
-loadLevel s = Level $ array ((0, 0), (len, len)) arrayElements
+loadLevel s = Level $ array ((0, 0), (levelWidth, levelHeight)) arrayElements
             where 
                   arrayElements :: [((Int, Int), Tile)]
                   arrayElements = foldl f [] numberedRows
+                  
+                  levelWidth = (length . head . lines) s - 1
+                  levelHeight = length numberedRows - 1
                   
                   numberedTiles :: [[(Int, Tile)]]
                   numberedTiles = map (zip [0..] . map toTile) (lines s)
@@ -27,8 +30,6 @@ loadLevel s = Level $ array ((0, 0), (len, len)) arrayElements
                   f acc (i, xs) = map (g i) xs ++ acc
                   
                   g i (j, tile) = ((j, i), tile)
-
-                  len = length numberedTiles - 1
 
 toTile :: Char -> Tile
 toTile 'g' = Grass

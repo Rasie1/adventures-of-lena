@@ -35,6 +35,7 @@ main = C.withSDL $ C.withSDLImage $ do
 
       let doRender = renderWorld r t
 
+
       levelString <- readFile "./assets/tiles.map"
 
       _ <- iterateUntilM
