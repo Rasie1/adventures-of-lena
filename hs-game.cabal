@@ -11,6 +11,9 @@ executable game
   main-is:             Main.hs
   other-modules:       Common
                        Level
+                       World
+                       GameState
+                       Input
   build-depends:       base
                      , sdl2
                      , sdl2-image

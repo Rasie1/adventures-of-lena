@@ -1,7 +1,5 @@
 module Level where
 
-import Control.Monad.Loops    
-import Data.Foldable          
 import Data.Array
 
 data Level = Level

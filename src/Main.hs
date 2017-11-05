@@ -3,40 +3,18 @@
 module Main (main) where
 
 import Level
+import World
+import GameState
+import Input
 
 import qualified SDL
 import qualified Common as C
 
 import Control.Monad
-import Control.Monad.Loops    
 import Data.Foldable          
 import Data.Array
 
 import System.Clock
-import Control.Exception
-import Formatting
-import Formatting.Clock
-
-data Intent
-  = Idle
-  | Quit
-
-data GameState = GameState
-  { exiting :: Bool
-  , level :: Level
-  , currentTime :: TimeSpec
-  }
-
-mkGameState :: Level -> TimeSpec -> GameState
-mkGameState lvl time = GameState
-  { exiting = False
-  , level = lvl
-  , currentTime = time
-  }
-
-data Camera = Camera (Double, Double)
-
-type DeltaTime = Double
 
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
@@ -49,12 +27,14 @@ main = C.withSDL $ C.withSDLImage $ do
       t <- C.loadTextureWithInfo r "./assets/tiles.png"
       levelString <- readFile "./assets/tiles.map"
 
-      currentTime <- getTime Monotonic
+      initialTime <- getTime Monotonic
 
-      let doRender = renderGameState r t
-      let initialGameState = mkGameState (loadLevel levelString) currentTime
-      let update x = updateGameState x <$> SDL.pollEvents
-                     >>= \x' -> x' <$ doRender x'
+      let initialGameState = mkGameState (World { level = loadLevel levelString }) initialTime
+      let update x = do inputHandled <- handleInput x <$> SDL.pollEvents
+                        currentTime <- getTime Monotonic
+                        updated <- updateGame inputHandled
+                        renderFrame r t updated
+                        return updated
 
       runApp update initialGameState
 
@@ -68,58 +48,17 @@ repeatUntil :: (Monad m) => (a -> m a) -> (a -> Bool) -> a -> m ()
 repeatUntil f p = go
   where go a = f a >>= \b -> unless (p b) (go b)
 
-updateGameState :: GameState -> [SDL.Event] -> GameState
-updateGameState w
-  = foldl' (flip applyIntent) w
-  . fmap (payloadToIntent . SDL.eventPayload)
+updateGame :: GameState -> IO GameState
+updateGame state = return (state { cameraPosition = (fst (cameraPosition state) + 1.0, snd (cameraPosition state) + 1.0) })
 
-payloadToIntent :: SDL.EventPayload -> Intent
-payloadToIntent SDL.QuitEvent            = Quit
-payloadToIntent (SDL.MouseMotionEvent e) = motionIntent e
-payloadToIntent (SDL.MouseButtonEvent e) = buttonIntent e
-payloadToIntent _                        = Idle
+renderFrame :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO ()
+renderFrame renderer texture gameState = do
+  SDL.clear renderer
+  drawWorld renderer texture (world gameState) (cameraPosition gameState)
+  SDL.present renderer
 
-motionIntent :: SDL.MouseMotionEventData -> Intent
-motionIntent _ = Idle
--- motionIntent e = Hover q
---   where
---     q = selectQuadrant x y
---     (SDL.P (SDL.V2 x y)) = SDL.mouseMotionEventPos e
-
-
-  -- | SDL.mouseButtonEventMotion e == SDL.Pressed -> Down
-  --
-buttonIntent :: SDL.MouseButtonEventData -> Intent
-buttonIntent _ = Idle
--- buttonIntent e = t q
---   where
---     q = selectQuadrant x y
---     (SDL.P (SDL.V2 x y)) = SDL.mouseButtonEventPos e
---     t = if SDL.mouseButtonEventMotion e == SDL.Pressed
---            then Press
---            else Release
-
-applyIntent :: Intent -> GameState -> GameState
-applyIntent Idle        = idleGameState
-applyIntent Quit        = quitGameState
-
-
-idleGameState :: GameState -> GameState
-idleGameState = id
-
-
-quitGameState :: GameState -> GameState
-quitGameState w = w { exiting = True }
-
-
-renderGameState :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO ()
-renderGameState r t w = do
-  SDL.clear r
-  drawGameState r t w (Camera (0, 0))
-  SDL.present r
-
-drawGameState :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> Camera -> IO ()
-drawGameState renderer (texture, ti) world camera = do
+drawWorld :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> World -> Camera -> IO ()
+drawWorld renderer (texture, ti) world camera = do
     forM_ (assocs . tiles . level $ world) $ \((i, j), tile) ->
       renderTile i j tile camera
     where
@@ -133,11 +72,15 @@ drawGameState renderer (texture, ti) world camera = do
 
       renderTile x y t camera
         = SDL.copy renderer texture
-            (Just $ floor <$> tileRect `moveTo` getTilesheetCoords t)
-            (Just $ floor <$> tileRect `moveTo` (fromIntegral x * tileWidth, fromIntegral y * tileWidth))
+            (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
+            (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
 
-applyCamera :: Camera -> SDL.Rectangle a -> SDL.Rectangle a
-applyCamera c r = r
 
-moveTo :: SDL.Rectangle a -> (a, a) -> SDL.Rectangle a
-moveTo (SDL.Rectangle _ d) (x, y) = SDL.Rectangle (C.mkPoint x y) d
+applyCamera :: Camera -> SDL.Rectangle Double -> SDL.Rectangle Double
+applyCamera (x, y) = moveBy (x, y)
+
+moveBy :: (Num a) => (a, a) -> SDL.Rectangle a -> SDL.Rectangle a
+moveBy (dx, dy) (SDL.Rectangle (SDL.P (SDL.V2 x y)) d) = SDL.Rectangle (C.mkPoint (x + dx) (y + dy)) d
+
+moveTo :: (a, a) -> SDL.Rectangle a -> SDL.Rectangle a
+moveTo (x, y) (SDL.Rectangle _ d) = SDL.Rectangle (C.mkPoint x y) d
