@@ -17,6 +17,8 @@ executable game
                      , monad-loops
                      , text
                      , array
+                     , clock
+                     , formatting
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
 
