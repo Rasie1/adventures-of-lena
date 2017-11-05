@@ -1,10 +1,33 @@
 module Level where
 
 import Data.Array
+import Common
+import Camera
+import Drawable
+import Control.Monad
+import qualified SDL
 
 data Level = Level
     { tiles :: Array (Int, Int) Tile
     } deriving Show
+
+instance Drawable Level where
+    render lvl camera renderer (texture, ti) = do
+        forM_ (assocs . tiles . lvl) $ \((i, j), tile) ->
+          renderTile i j tile camera
+        where
+          tileWidth :: Double
+          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
+          tileRect = mkRect 0 0 tileWidth tileWidth
+
+          getTilesheetCoords :: (Num a) => Tile -> (a, a)
+          getTilesheetCoords Sky = (0, 0)
+          getTilesheetCoords Grass = (64, 0)
+
+          renderTile x y t camera
+            = SDL.copy renderer texture
+                (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
+                (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
 
 
 data Tile = Sky | Grass deriving Show

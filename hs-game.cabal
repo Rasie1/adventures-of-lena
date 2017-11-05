@@ -14,6 +14,8 @@ executable game
                        World
                        GameState
                        Input
+                       Drawable
+                       Camera
   build-depends:       base
                      , sdl2
                      , sdl2-image
