@@ -16,6 +16,7 @@ executable game
                        Input
                        Drawable
                        Camera
+                       Actor
   build-depends:       base
                      , sdl2
                      , sdl2-image

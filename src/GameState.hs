@@ -3,6 +3,7 @@ module GameState where
 import World
 import System.Clock
 import Camera
+import Common
 
 data GameState = GameState
   { exiting :: Bool
@@ -24,8 +25,6 @@ mkGameState w time = GameState
   , framesSinceLastFPSPrint = 0
   , lastFPSPrintTime = time
   }
-
-type DeltaTime = Double
 
 idleGameState :: GameState -> GameState
 idleGameState = id
