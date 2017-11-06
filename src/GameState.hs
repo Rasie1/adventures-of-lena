@@ -6,9 +6,13 @@ import Camera
 
 data GameState = GameState
   { exiting :: Bool
+
   , world :: World
-  , currentTime :: TimeSpec
   , cameraPosition :: Camera
+  , currentTime :: TimeSpec
+
+  , framesSinceLastFPSPrint :: Int
+  , lastFPSPrintTime :: TimeSpec
   }
 
 mkGameState :: World -> TimeSpec -> GameState
@@ -17,6 +21,8 @@ mkGameState w time = GameState
   , world = w
   , currentTime = time
   , cameraPosition = (0, 0)
+  , framesSinceLastFPSPrint = 0
+  , lastFPSPrintTime = time
   }
 
 type DeltaTime = Double
