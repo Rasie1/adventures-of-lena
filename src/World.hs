@@ -8,4 +8,4 @@ data World = World
   }
 
 instance Drawable World where
-    render world = render level
+    render world = render (level world)

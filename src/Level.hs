@@ -13,7 +13,7 @@ data Level = Level
 
 instance Drawable Level where
     render lvl camera renderer (texture, ti) = do
-        forM_ (assocs . tiles . lvl) $ \((i, j), tile) ->
+        forM_ (assocs (tiles lvl)) $ \((i, j), tile) ->
           renderTile i j tile camera
         where
           tileWidth :: Double

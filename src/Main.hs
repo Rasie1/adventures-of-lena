@@ -9,7 +9,7 @@ import Input
 import Drawable
 
 import qualified SDL
-import qualified Common
+import Common
 
 import Control.Monad
 import Data.Foldable          
