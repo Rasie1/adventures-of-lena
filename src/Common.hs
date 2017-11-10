@@ -3,6 +3,7 @@ module Common where
 import qualified SDL
 
 type Position = (Double, Double)
+type Speed = (Double, Double)
 type DeltaTime = Double
 
 

@@ -4,6 +4,7 @@ import Data.Array
 import Common
 import Camera
 import Drawable
+import Actor
 import Control.Monad
 import qualified SDL
 
@@ -17,17 +18,20 @@ instance Drawable Level where
           renderTile i j tile camera
         where
           tileWidth :: Double
-          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
+          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
-          getTilesheetCoords Sky = (0, 0)
-          getTilesheetCoords Grass = (64, 0)
+          getTilesheetCoords Sky = (288, 416)
+          getTilesheetCoords Grass = (0, 192)
 
           renderTile x y t camera
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
                 (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
+
+instance Actor Level where
+    act _ = Just
 
 
 data Tile = Sky | Grass deriving Show

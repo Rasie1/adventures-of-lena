@@ -6,9 +6,7 @@ import Camera
 import Common
 
 data GameState = GameState
-  { exiting :: Bool
-
-  , world :: World
+  { world :: Maybe World
   , cameraPosition :: Camera
   , currentTime :: TimeSpec
 
@@ -18,8 +16,7 @@ data GameState = GameState
 
 mkGameState :: World -> TimeSpec -> GameState
 mkGameState w time = GameState
-  { exiting = False
-  , world = w
+  { world = Just w
   , currentTime = time
   , cameraPosition = (0, 0)
   , framesSinceLastFPSPrint = 0
@@ -30,4 +27,4 @@ idleGameState :: GameState -> GameState
 idleGameState = id
 
 quitGameState :: GameState -> GameState
-quitGameState w = w { exiting = True }
+quitGameState w = w { world = Nothing }

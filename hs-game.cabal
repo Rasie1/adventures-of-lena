@@ -17,6 +17,7 @@ executable game
                        Drawable
                        Camera
                        Actor
+                       Character
   build-depends:       base
                      , sdl2
                      , sdl2-image

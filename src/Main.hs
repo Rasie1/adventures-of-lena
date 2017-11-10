@@ -7,6 +7,8 @@ import World
 import GameState
 import Input
 import Drawable
+import Actor
+import Character
 
 import qualified SDL
 
@@ -15,6 +17,7 @@ import qualified SDL.Image
 import Control.Monad          (void)
 import Control.Monad.IO.Class (MonadIO)
 import Data.Text              (Text)
+import Data.Maybe
 
 import SDL (($=))
 import Common
@@ -40,7 +43,8 @@ main = withSDL $ withSDLImage $ do
 
       initialTime <- getTime Monotonic
 
-      let initialGameState = mkGameState (World { level = loadLevel levelString }) initialTime
+      let initialGameState = mkGameState (World { level = loadLevel levelString
+                                                , characters = [Character { characterSpeed = (0,0) }] }) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)
@@ -63,15 +67,16 @@ main = withSDL $ withSDLImage $ do
 
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()
-runApp update = repeatUntil update exiting
+runApp update = repeatUntil update (isNothing . world)
 
 repeatUntil :: (Monad m) => (a -> m a) -> (a -> Bool) -> a -> m ()
 repeatUntil f p = go
   where go a = f a >>= \b -> unless (p b) (go b)
 
 updateGame :: DeltaTime -> GameState -> IO GameState
-updateGame dt state = return (state { cameraPosition = (fst (cameraPosition state) + 100.0 * dt,
-                                                        snd (cameraPosition state) + 100.0 * dt) })
+updateGame dt state = return (state { world = updateWorld (world state) })
+                        where updateWorld Nothing = Nothing
+                              updateWorld (Just w) = act dt w
 
 renderFrame :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO (GameState)
 renderFrame renderer texture gameState = do
