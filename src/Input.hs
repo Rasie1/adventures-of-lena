@@ -1,23 +1,33 @@
 module Input where
 
 import qualified SDL
-import GameState
-import Data.Foldable          
-
-data Intent
-  = Idle
-  | Quit
-
-handleInput :: GameState -> [SDL.Event] -> GameState
-handleInput w
-  = foldl' (flip applyIntent) w
-  . fmap (payloadToIntent . SDL.eventPayload)
+import Intent
 
 payloadToIntent :: SDL.EventPayload -> Intent
 payloadToIntent SDL.QuitEvent            = Quit
 payloadToIntent (SDL.MouseMotionEvent e) = motionIntent e
 payloadToIntent (SDL.MouseButtonEvent e) = buttonIntent e
+payloadToIntent (SDL.KeyboardEvent k)    = keyEventToIntent k
 payloadToIntent _                        = Idle
+
+keyEventToIntent :: SDL.KeyboardEventData -> Intent
+keyEventToIntent (SDL.KeyboardEventData _ SDL.Released _ _) = Idle
+keyEventToIntent (SDL.KeyboardEventData _ SDL.Pressed _ keysym) =
+  case SDL.keysymKeycode keysym of
+    SDL.KeycodeEscape -> Quit
+    SDL.KeycodeW      -> Jump
+    SDL.KeycodeA      -> MoveLeft
+    SDL.KeycodeS      -> Idle
+    SDL.KeycodeD      -> MoveRight
+    SDL.KeycodeUp     -> Jump
+    SDL.KeycodeLeft   -> MoveLeft
+    SDL.KeycodeDown   -> Idle
+    SDL.KeycodeRight  -> MoveRight
+    SDL.KeycodeSpace  -> Jump
+    SDL.KeycodeLCtrl  -> Attack
+    SDL.KeycodeRCtrl  -> Attack
+    _                 -> Idle
+
 
 motionIntent :: SDL.MouseMotionEventData -> Intent
 motionIntent _ = Idle
@@ -38,7 +48,3 @@ buttonIntent _ = Idle
 --     t = if SDL.mouseButtonEventMotion e == SDL.Pressed
 --            then Press
 --            else Release
-
-applyIntent :: Intent -> GameState -> GameState
-applyIntent Idle        = idleGameState
-applyIntent Quit        = quitGameState

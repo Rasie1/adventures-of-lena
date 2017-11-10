@@ -1,17 +1,29 @@
 module Character where
 
-import Data.Array
 import Common
 import Camera
 import Drawable
 import Actor
 import Level
-import Control.Monad
+import Intent
 import qualified SDL
 
 data Character = Character
     { characterPosition :: Position
     , characterSpeed :: Speed
+
+    , characterController :: Controller
+
+    , moving :: MovePosition
+    , falling :: Bool
+    , attacking :: Bool
+    }
+
+data MovePosition = Left | Right
+
+data Controller = Controller
+    { port :: Int,
+      actions :: [Intent]
     }
 
 applySpeed :: DeltaTime -> Position -> Speed -> Position
