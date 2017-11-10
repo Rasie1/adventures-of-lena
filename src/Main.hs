@@ -36,8 +36,7 @@ main = withSDL $ withSDLImage $ do
 
       initialTime <- getTime Monotonic
 
-      let initialGameState = mkGameState (World { level = loadLevel levelString
-                                                , characters = [Character { characterSpeed = (0,0) }] }) initialTime
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString)) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)

@@ -34,7 +34,7 @@ instance Actor Level where
     act _ = Just
 
 
-data Tile = Sky | Grass deriving Show
+data Tile = Sky | Grass | Player | Enemy deriving Show
 
 
 loadLevel :: String -> Level
@@ -58,5 +58,7 @@ loadLevel s = Level $ array ((0, 0), (levelWidth, levelHeight)) arrayElements
 
 toTile :: Char -> Tile
 toTile 'g' = Grass
+toTile 'p' = Player
+toTile 'e' = Enemy
 toTile _ = Sky
 

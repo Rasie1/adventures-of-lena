@@ -19,3 +19,11 @@ instance Drawable World where
 instance Actor World where
     act dt w = Just w { characters = mapMaybe (act dt) (characters w) }
 
+mkWorld :: Level -> World
+mkWorld lvl = World 
+    { level = lvl
+    , characters = spawnCharacters lvl
+    }
+
+spawnCharacters :: Level -> [Character]
+spawnCharacters lvl = [Character { characterSpeed = (0,0) }]
