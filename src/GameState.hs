@@ -4,6 +4,7 @@ import World
 import System.Clock
 import Camera
 import Common
+import Types
 
 data GameState = GameState
   { world :: Maybe World

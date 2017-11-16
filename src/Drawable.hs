@@ -1,12 +1,11 @@
 module Drawable where
 
 import qualified SDL
-import Camera
-import Actor
+import Types
     
-class Actor a => Drawable a where
-    render :: a -> Camera -> SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> IO ()
+class Drawable a where
+    render :: Camera -> SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> a -> IO ()
 
 instance Drawable a => Drawable (Maybe a) where
-    render (Just x) c r t = render x c r t
-    render Nothing _ _ _ = return ()
+    render c r t (Just x) = render c r t x
+    render _ _ _ Nothing  = return ()

@@ -21,7 +21,7 @@ import Drawable
 renderFrame :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO (GameState)
 renderFrame renderer texture gameState = do
   SDL.clear renderer
-  render (world gameState) (cameraPosition gameState) renderer texture
+  render (cameraPosition gameState) renderer texture (world gameState)
   SDL.present renderer
   return gameState
 

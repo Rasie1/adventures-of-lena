@@ -1,7 +1,7 @@
 module Input where
 
 import qualified SDL
-import Intent
+import Types
 
 payloadToIntent :: SDL.EventPayload -> Intent
 payloadToIntent SDL.QuitEvent            = Quit

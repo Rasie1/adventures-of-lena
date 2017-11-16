@@ -4,16 +4,12 @@ import Data.Array
 import Common
 import Camera
 import Drawable
-import Actor
 import Control.Monad
 import qualified SDL
-
-data Level = Level
-    { tiles :: Array (Int, Int) Tile
-    } deriving Show
+import Types
 
 instance Drawable Level where
-    render lvl camera renderer (texture, ti) = do
+    render camera renderer (texture, ti) lvl = do
         forM_ (assocs (tiles lvl)) $ \((i, j), tile) ->
           renderTile i j tile camera
         where
@@ -29,12 +25,6 @@ instance Drawable Level where
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
                 (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
-
-instance Actor Level where
-    act _ = Just
-
-
-data Tile = Sky | Grass | Player | Enemy deriving Show
 
 
 loadLevel :: String -> Level

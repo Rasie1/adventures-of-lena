@@ -14,12 +14,12 @@ executable game
                        World
                        GameState
                        Input
-                       Intent
                        Drawable
                        Camera
                        Actor
                        Character
                        Rendering
+                       Types
   build-depends:       base
                      , sdl2
                      , sdl2-image

@@ -1,23 +1,17 @@
-{-# LANGUAGE ExistentialQuantification #-}
 module World where
 
 import Level
-import Actor
 import Drawable
 import Data.Maybe
 import Character
-
-data World = World
-  { level :: Level
-  , characters :: [Character]
-  }
+import Types
 
 instance Drawable World where
-    render world = do render (level world)
-                      -- render <$> actors
+    render c r t world = do render c r t (level world)
+                            mapM_ (render c r t) (characters world)
 
-instance Actor World where
-    act dt w = Just w { characters = mapMaybe (act dt) (characters w) }
+updateWorld :: Double -> World -> Maybe World
+updateWorld dt w = Just w { characters = mapMaybe (updateCharacter dt w) (characters w) }
 
 mkWorld :: Level -> World
 mkWorld lvl = World 
@@ -26,4 +20,22 @@ mkWorld lvl = World
     }
 
 spawnCharacters :: Level -> [Character]
-spawnCharacters lvl = [Character { characterSpeed = (0,0) }]
+spawnCharacters lvl = [player]
+
+player = Character 
+    { moveSpeed  = 100
+    , radius     = 256
+    , inertia    = 0.5
+    , jumpHeight = 100
+
+    , currentPosition = (50, 250)
+    , currentSpeed    = (10, 10)
+
+    , characterController = Controller { port = 0, actions = [] }
+
+    , moving    = NotMoving
+    , falling   = False
+    , using     = False
+    , attacking = False
+    , jumping   = False
+    }

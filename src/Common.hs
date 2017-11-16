@@ -2,10 +2,6 @@ module Common where
 
 import qualified SDL
 
-type Position = (Double, Double)
-type Speed = (Double, Double)
-type DeltaTime = Double
-
 
 isContinue :: Maybe SDL.Event -> Bool
 isContinue = maybe True (not . isQuitEvent)

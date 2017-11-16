@@ -6,7 +6,7 @@ import Common
 import Level
 import World
 import GameState
-import Intent
+import Types
 import Input
 import Actor
 import Character
@@ -66,15 +66,12 @@ repeatUntil f p = go
   where go a = f a >>= \b -> unless (p b) (go b)
 
 updateGame :: DeltaTime -> GameState -> IO GameState
-updateGame dt state = return (state { world = updateWorld (world state) })
-                        where updateWorld Nothing = Nothing
-                              updateWorld (Just w) = act dt w
+updateGame dt state = return state { world = world state >>= updateWorld dt }
 
-
-applyIntent :: Intent -> GameState -> GameState
-applyIntent _        = idleGameState
-applyIntent Quit        = quitGameState
+applyIntentToGameState :: Intent -> GameState -> GameState
+applyIntentToGameState _        = idleGameState
+applyIntentToGameState Quit        = quitGameState
 
 handleInput :: GameState -> [SDL.Event] -> GameState
 handleInput w
-  = foldl' (flip applyIntent) w . fmap (payloadToIntent . SDL.eventPayload)
+  = foldl' (flip applyIntentToGameState) w . fmap (payloadToIntent . SDL.eventPayload)

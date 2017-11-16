@@ -3,35 +3,9 @@ module Character where
 import Common
 import Camera
 import Drawable
-import Actor
+import Types
 import Level
-import Intent
 import qualified SDL
-
-data Character = Character
-    { moveSpeed  :: Double
-    , radius     :: Double
-    , inertia    :: Double
-    , jumpHeight :: Double
-
-    , currentPosition :: Position
-    , currentSpeed    :: Speed
-
-    , characterController :: Controller
-
-    , moving    :: MovePosition
-    , falling   :: Bool
-    , using     :: Bool
-    , attacking :: Bool
-    , jumping   :: Bool
-    }
-
-data MovePosition = MovingLeft | MovingRight | NotMoving
-
-data Controller = Controller
-    { port :: Int,
-      actions :: [Intent]
-    }
 
 applySpeed :: DeltaTime -> Position -> Speed -> Position
 applySpeed dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
@@ -74,8 +48,8 @@ updatePosition :: Character -> Character
 updatePosition c@Character { currentSpeed = (dx, dy)
                            , currentPosition = (x, y) } = c { currentPosition = (x + dx, y + dy) }
 
-instance Actor Character where
-    act dt ch = Just . updatePosition
+updateCharacter :: Double -> World -> Character -> Maybe Character
+updateCharacter dt world ch = Just . updatePosition
                            -- . fall world
                            -- . applyGravity
                            -- . activate world
@@ -84,18 +58,17 @@ instance Actor Character where
                            . move $ ch
 
 instance Drawable Character where
-    render character camera renderer (texture, ti) = do
-        renderTile 0 (-1) Sky camera
+    render camera renderer (texture, ti) character = do
+        renderTile 0 (-1) camera
         where
           tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
           tileRect = mkRect 0 0 tileWidth tileWidth
 
-          getTilesheetCoords :: (Num a) => Tile -> (a, a)
-          getTilesheetCoords Sky = (0, 0)
-          getTilesheetCoords Grass = (64, 0)
+          getTilesheetCoords :: (Num a) => (a, a)
+          getTilesheetCoords = (192, 192)
 
-          renderTile x y t camera
+          renderTile x y camera
             = SDL.copy renderer texture
-                (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
+                (Just $ floor <$> moveTo getTilesheetCoords tileRect)
                 (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
