@@ -44,14 +44,24 @@ move c@Character { moving = NotMoving
                  , currentSpeed = (dx, dy)
                  , moveSpeed = m } = c { currentSpeed = (0, dy)}
 
-updatePosition :: Character -> Character
-updatePosition c@Character { currentSpeed = (dx, dy)
-                           , currentPosition = (x, y) } = c { currentPosition = (x + dx, y + dy) }
+updatePosition :: DeltaTime -> Character -> Character
+updatePosition dt c@Character { currentSpeed = (dx, dy)
+                              , currentPosition = (x, y) } = 
+    c { currentPosition = (x + dx * dt, y + dy * dt) }
 
-updateCharacter :: Double -> World -> Character -> Maybe Character
-updateCharacter dt world ch = Just . updatePosition
-                           -- . fall world
-                           -- . applyGravity
+fall :: World -> Character -> Character
+fall world character = character
+
+characterGravity = 9.8
+
+applyGravity :: Character -> Character
+applyGravity c@Character { currentSpeed = (dx, dy) } = 
+    c { currentSpeed = (dx, dy + characterGravity) }
+
+updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
+updateCharacter dt world ch = Just . updatePosition dt
+                           . fall world
+                           . applyGravity
                            -- . activate world
                            -- . attack world
                            . jump 
@@ -59,7 +69,7 @@ updateCharacter dt world ch = Just . updatePosition
 
 instance Drawable Character where
     render camera renderer (texture, ti) character = do
-        renderTile 0 (-1) camera
+        renderSprite (currentPosition character) camera
         where
           tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
@@ -68,7 +78,7 @@ instance Drawable Character where
           getTilesheetCoords :: (Num a) => (a, a)
           getTilesheetCoords = (192, 192)
 
-          renderTile x y camera
+          renderSprite (x, y) camera
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo getTilesheetCoords tileRect)
-                (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
+                (Just $ floor <$> applyCamera camera (moveTo (x, y) tileRect))

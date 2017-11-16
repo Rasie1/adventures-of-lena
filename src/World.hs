@@ -28,8 +28,8 @@ player = Character
     , inertia    = 0.5
     , jumpHeight = 100
 
-    , currentPosition = (50, 250)
-    , currentSpeed    = (10, 10)
+    , currentPosition = (0, 0)
+    , currentSpeed    = (0, 0)
 
     , characterController = Controller { port = 0, actions = [] }
 
