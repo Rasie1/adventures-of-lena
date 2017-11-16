@@ -69,8 +69,10 @@ updateGame :: DeltaTime -> GameState -> IO GameState
 updateGame dt state = return state { world = world state >>= updateWorld dt }
 
 applyIntentToGameState :: Intent -> GameState -> GameState
-applyIntentToGameState _        = idleGameState
-applyIntentToGameState Quit        = quitGameState
+applyIntentToGameState i s@GameState { world = Just w@World { characters = (player:xs) } } = 
+        s { world = Just w { characters = (applyIntent i player):xs } }
+applyIntentToGameState Quit s = quitGameState s
+applyIntentToGameState _ s    = s
 
 handleInput :: GameState -> [SDL.Event] -> GameState
 handleInput w

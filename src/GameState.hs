@@ -24,8 +24,5 @@ mkGameState w time = GameState
   , lastFPSPrintTime = time
   }
 
-idleGameState :: GameState -> GameState
-idleGameState = id
-
 quitGameState :: GameState -> GameState
 quitGameState w = w { world = Nothing }
