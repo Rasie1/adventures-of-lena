@@ -54,9 +54,15 @@ fall :: DeltaTime -> World -> Character -> Character
 fall dt World { level = Level { tiles = t } }
         c@Character { currentPosition = (x, y)
                     , currentSpeed = (dx, dy) } = 
-    if isSolid (t ! (floor (x + dx * dt), floor (y + dy * dt))) 
-        then c { currentSpeed = (0, 0) }
-        else c
+    if pos `elem` indices t 
+        then if isSolid (t ! pos)
+                 then stop
+                 else c
+        else stop
+    where stopy = c { currentSpeed = (dx, 0), falling = False }
+          stopx = c { currentSpeed = (0, dy), falling = False }
+          stop  = c { currentSpeed = (0, 0) , falling = False  }
+          pos = (floor (x + dx * dt), floor (y + dy * dt))
 
 characterGravity = 0.098
 
@@ -78,7 +84,7 @@ instance Drawable Character where
         renderSprite (currentPosition character) camera
         where
           tileWidth :: Double
-          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 16
+          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => (a, a)
