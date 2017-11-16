@@ -52,3 +52,9 @@ toTile 'p' = Player
 toTile 'e' = Enemy
 toTile _ = Sky
 
+isSolid :: Tile -> Bool
+isSolid Sky = False
+isSolid Grass = True
+isSolid Player = False
+isSolid Enemy = False
+

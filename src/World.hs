@@ -23,10 +23,10 @@ spawnCharacters :: Level -> [Character]
 spawnCharacters lvl = [player]
 
 player = Character 
-    { moveSpeed  = 100
-    , radius     = 256
+    { moveSpeed  = 3
+    , radius     = 1
     , inertia    = 0.5
-    , jumpHeight = 100
+    , jumpHeight = 3
 
     , currentPosition = (0, 0)
     , currentSpeed    = (0, 0)

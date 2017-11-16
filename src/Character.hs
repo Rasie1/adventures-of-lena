@@ -6,6 +6,7 @@ import Drawable
 import Types
 import Level
 import qualified SDL
+import Data.Array
 
 applySpeed :: DeltaTime -> Position -> Speed -> Position
 applySpeed dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
@@ -31,7 +32,7 @@ jump c@Character { jumping = True
                  , jumpHeight = jy
                  , falling = False } = c { jumping = False
                                          , falling = True
-                                         , currentSpeed = (dx, dy + jy) }
+                                         , currentSpeed = (dx, dy - jy) }
 
 move :: Character -> Character
 move c@Character { moving = MovingLeft
@@ -49,10 +50,15 @@ updatePosition dt c@Character { currentSpeed = (dx, dy)
                               , currentPosition = (x, y) } = 
     c { currentPosition = (x + dx * dt, y + dy * dt) }
 
-fall :: World -> Character -> Character
-fall world character = character
+fall :: DeltaTime -> World -> Character -> Character
+fall dt World { level = Level { tiles = t } }
+        c@Character { currentPosition = (x, y)
+                    , currentSpeed = (dx, dy) } = 
+    if isSolid (t ! (floor (x + dx * dt), floor (y + dy * dt))) 
+        then c { currentSpeed = (0, 0) }
+        else c
 
-characterGravity = 9.8
+characterGravity = 0.098
 
 applyGravity :: Character -> Character
 applyGravity c@Character { currentSpeed = (dx, dy) } = 
@@ -60,7 +66,7 @@ applyGravity c@Character { currentSpeed = (dx, dy) } =
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just . updatePosition dt
-                           . fall world
+                           . fall dt world
                            . applyGravity
                            -- . activate world
                            -- . attack world
@@ -81,4 +87,4 @@ instance Drawable Character where
           renderSprite (x, y) camera
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo getTilesheetCoords tileRect)
-                (Just $ floor <$> applyCamera camera (moveTo (x, y) tileRect))
+                (Just $ floor <$> applyCamera camera (moveTo (x * tileWidth, y * tileWidth) tileRect))
