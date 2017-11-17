@@ -53,6 +53,7 @@ updatePosition dt c@Character { currentSpeed = (dx, dy)
 fall :: DeltaTime -> World -> Character -> Character
 fall dt World { level = Level { tiles = t } }
         c@Character { currentPosition = (x, y)
+                    , falling = True
                     , currentSpeed = (dx, dy) } = 
     if pos `elem` indices t 
         then if isSolid (t ! pos)
@@ -61,14 +62,27 @@ fall dt World { level = Level { tiles = t } }
         else stop
     where stopy = c { currentSpeed = (dx, 0), falling = False }
           stopx = c { currentSpeed = (0, dy), falling = False }
-          stop  = c { currentSpeed = (0, 0) , falling = False  }
-          pos = (floor (x + dx * dt), floor (y + dy * dt))
+          stop  = c { currentSpeed = (0, 0) , falling = False }
+          pos = (round (x + dx * dt), round (y + dy * dt))
+
+fall dt World { level = Level { tiles = t } }
+        c@Character { currentPosition = (x, y)
+                    , falling = False } = 
+    if pos `elem` indices t
+        then if isSolid (t ! pos)
+                 then c 
+                 else fallen
+        else c
+    where pos = (round (x + characterGravity * dt), round (y + characterGravity * dt))
+          fallen = c { falling = True }
 
 characterGravity = 0.098
 
 applyGravity :: Character -> Character
-applyGravity c@Character { currentSpeed = (dx, dy) } = 
+applyGravity c@Character { falling = True
+                         , currentSpeed = (dx, dy) } = 
     c { currentSpeed = (dx, dy + characterGravity) }
+applyGravity c@Character { falling = False } = c
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just . updatePosition dt

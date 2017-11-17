@@ -34,7 +34,7 @@ player = Character
     , characterController = Controller { port = 0, actions = [] }
 
     , moving    = NotMoving
-    , falling   = False
+    , falling   = True
     , using     = False
     , attacking = False
     , jumping   = False
