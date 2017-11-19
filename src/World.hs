@@ -24,11 +24,11 @@ spawnCharacters lvl = [player]
 
 player = Character 
     { moveSpeed  = 3
-    , radius     = 1
-    , inertia    = 0.5
-    , jumpHeight = 3
+    , radius     = 0.5
+    , inertia    = 0.1
+    , jumpHeight = 1
 
-    , currentPosition = (0, 0)
+    , currentPosition = (3, 3)
     , currentSpeed    = (0, 0)
 
     , characterController = Controller { port = 0, actions = [] }

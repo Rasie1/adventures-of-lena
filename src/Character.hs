@@ -52,42 +52,60 @@ updatePosition dt c@Character { currentSpeed = (dx, dy)
 
 fall :: DeltaTime -> World -> Character -> Character
 fall dt World { level = Level { tiles = t } }
-        c@Character { currentPosition = (x, y)
-                    , falling = True
+        c@Character { radius = r
+                    , currentPosition = (x, y)
+                    , falling = isFalling
                     , currentSpeed = (dx, dy) } = 
-    if pos `elem` indices t 
-        then if isSolid (t ! pos)
-                 then stop
-                 else c
-        else stop
-    where stopy = c { currentSpeed = (dx, 0), falling = False }
-          stopx = c { currentSpeed = (0, dy), falling = False }
-          stop  = c { currentSpeed = (0, 0) , falling = False }
-          pos = (round (x + dx * dt), round (y + dy * dt))
+    applyXcollisions . applyYcollisions $ c
+    where stopy d c@Character { currentSpeed = (dx, dy) } = 
+              c { currentSpeed = (dx, d) }
+          stopx d c@Character { currentSpeed = (dx, dy) } = 
+              c { currentSpeed = (d, dy) }
+          applyGravity c@Character { currentSpeed = (dx, dy) } = 
+              c { currentSpeed = (dx, dy + characterGravity) 
+                , falling = True }
+          stand c = c { falling = False }
 
-fall dt World { level = Level { tiles = t } }
-        c@Character { currentPosition = (x, y)
-                    , falling = False } = 
-    if pos `elem` indices t
-        then if isSolid (t ! pos)
-                 then c 
-                 else fallen
-        else c
-    where pos = (round (x + characterGravity * dt), round (y + characterGravity * dt))
-          fallen = c { falling = True }
+          nextX = x + dx * dt 
+          nextY = y + dy * dt
+          nextXl = nextX - r
+          nextXr = nextX + r
+          nextYt = nextY - r + characterGravity
+          nextYb = nextY + r + characterGravity
 
-characterGravity = 0.098
+          alignDistance x = ((fromIntegral . floor $ x) - x) / dt
 
-applyGravity :: Character -> Character
-applyGravity c@Character { falling = True
-                         , currentSpeed = (dx, dy) } = 
-    c { currentSpeed = (dx, dy + characterGravity) }
-applyGravity c@Character { falling = False } = c
+          bumpedxl = checkBump (nextXl, y)
+          bumpedxr = checkBump (nextXr, y)
+          bumpedyt = checkBump (x, nextYt)
+          bumpedyb = checkBump (x, nextYb)
+          bumpxl = if bumpedxl
+                        then stopx (alignDistance nextXl)
+                        else id
+          bumpxr = if bumpedxr
+                        then stopx (alignDistance nextXr) 
+                        else id
+          bumpyt = applyGravity .
+                     if bumpedyt
+                        then stopy (alignDistance nextYt)
+                        else id
+          bumpyb = if bumpedyb
+                        then stand . stopy (alignDistance nextYb)
+                        else applyGravity
+          applyXcollisions = if bumpedxl then bumpxl
+                                         else if bumpedxr then bumpxr
+                                                          else id
+          applyYcollisions = if bumpedyt then bumpyt
+                                         else if bumpedyb then bumpyb
+                                                          else applyGravity
+
+          checkBump (x, y) = isSolid (t ! (floor x, floor y)) 
+
+characterGravity = 0.2
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just . updatePosition dt
                            . fall dt world
-                           . applyGravity
                            -- . activate world
                            -- . attack world
                            . jump 
@@ -95,11 +113,14 @@ updateCharacter dt world ch = Just . updatePosition dt
 
 instance Drawable Character where
     render camera renderer (texture, ti) character = do
-        renderSprite (currentPosition character) camera
+        renderSprite pos camera
         where
           tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
+
+          pos = currentPosition character `pointPlus` (- radius character,
+                                                       - radius character)
 
           getTilesheetCoords :: (Num a) => (a, a)
           getTilesheetCoords = (192, 192)

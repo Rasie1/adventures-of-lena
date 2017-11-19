@@ -33,3 +33,6 @@ moveBy (dx, dy) (SDL.Rectangle (SDL.P (SDL.V2 x y)) d) = SDL.Rectangle (mkPoint 
 
 moveTo :: (a, a) -> SDL.Rectangle a -> SDL.Rectangle a
 moveTo (x, y) (SDL.Rectangle _ d) = SDL.Rectangle (mkPoint x y) d
+
+pointPlus :: (Double, Double) -> (Double, Double) -> (Double, Double) 
+pointPlus (x, y) (a, b) = (x + a, y + b)
