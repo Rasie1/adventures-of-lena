@@ -8,8 +8,8 @@ import Level
 import qualified SDL
 import Data.Array
 
-applySpeed :: DeltaTime -> Position -> Speed -> Position
-applySpeed dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
+applyVelocity :: DeltaTime -> Position -> Velocity -> Position
+applyVelocity dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
 
 cleanIntent :: Character -> Character
 cleanIntent c = c { moving = NotMoving }
@@ -28,27 +28,27 @@ jump c@Character { jumping = False } = c
 jump c@Character { jumping = True
                  , falling = True } = c { jumping = False }
 jump c@Character { jumping = True
-                 , currentSpeed = (dx, dy)
-                 , jumpHeight = jy
+                 , currentVelocity = (dx, dy)
+                 , jumpPower       = jy
                  , currentPosition = cp
                  , falling = False } = c { jumping = False
                                          , falling = True
                                          , currentPosition = cp `pointPlus` (0, -1)
-                                         , currentSpeed = (dx, dy - jy) }
+                                         , currentVelocity = (dx, dy - jy) }
 
 move :: Character -> Character
 move c@Character { moving = MovingLeft
-                 , currentSpeed = (dx, dy)
-                 , moveSpeed = m } = c { currentSpeed = (-m, dy)}
+                 , currentVelocity = (dx, dy)
+                 , moveVelocity = m } = c { currentVelocity = (-m, dy)}
 move c@Character { moving = MovingRight 
-                 , currentSpeed = (dx, dy)
-                 , moveSpeed = m } = c { currentSpeed = (m, dy)}
+                 , currentVelocity = (dx, dy)
+                 , moveVelocity = m } = c { currentVelocity = (m, dy)}
 move c@Character { moving = NotMoving 
-                 , currentSpeed = (dx, dy)
-                 , moveSpeed = m } = c { currentSpeed = (0, dy)}
+                 , currentVelocity = (dx, dy)
+                 , moveVelocity = m } = c { currentVelocity = (0, dy)}
 
 updatePosition :: DeltaTime -> Character -> Character
-updatePosition dt c@Character { currentSpeed = (dx, dy)
+updatePosition dt c@Character { currentVelocity = (dx, dy)
                               , currentPosition = (x, y) } = 
     c { currentPosition = (x + dx * dt, y + dy * dt) }
 
@@ -57,18 +57,18 @@ fall dt World { level = Level { tiles = t } }
         c@Character { radius = r
                     , currentPosition = (x, y)
                     , falling = isFalling
-                    , currentSpeed = (dx, dy) } = 
+                    , currentVelocity = (dx, dy) } = 
     applyXcollisions . applyYcollisions $ c
-    where stopy d c@Character { currentSpeed = (dx, dy) 
+    where stopy d c@Character { currentVelocity = (dx, dy) 
                               , currentPosition = (x, y) } = 
-              c { currentSpeed = (dx, 0) 
+              c { currentVelocity = (dx, 0) 
                 , currentPosition = (x, y + d) }
-          stopx d c@Character { currentSpeed = (dx, dy) 
+          stopx d c@Character { currentVelocity = (dx, dy) 
                               , currentPosition = (x, y)} = 
-              c { currentSpeed = (0, dy)
+              c { currentVelocity = (0, dy)
                 , currentPosition = (x + d, y) }
-          applyGravity c@Character { currentSpeed = (dx, dy) } = 
-              c { currentSpeed = (dx, dy + characterGravity) 
+          applyGravity c@Character { currentVelocity = (dx, dy) } = 
+              c { currentVelocity = (dx, dy + characterGravity) 
                 , falling = True }
           stand c = c { falling = False }
 

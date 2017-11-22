@@ -4,17 +4,17 @@ import Data.Array
 
 type Camera = (Double, Double)
 type Position = (Double, Double)
-type Speed = (Double, Double)
+type Velocity = (Double, Double)
 type DeltaTime = Double
 
 data Character = Character
-    { moveSpeed  :: Double
-    , radius     :: Double
-    , inertia    :: Double
-    , jumpHeight :: Double
+    { moveVelocity :: Double
+    , radius       :: Double
+    , inertia      :: Double
+    , jumpPower   :: Double
 
     , currentPosition :: Position
-    , currentSpeed    :: Speed
+    , currentVelocity :: Velocity
 
     , characterController :: Controller
 

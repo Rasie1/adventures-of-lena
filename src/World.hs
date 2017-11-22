@@ -29,13 +29,13 @@ tileToCharacter ((x, y), Player) =
 tileToCharacter _ = Nothing
 
 player = Character 
-    { moveSpeed  = 3
-    , radius     = 0.5
-    , inertia    = 0.1
-    , jumpHeight = 5
+    { moveVelocity = 3
+    , radius       = 0.5
+    , inertia      = 0.1
+    , jumpPower    = 5
 
     , currentPosition = (0, 0)
-    , currentSpeed    = (0, 0)
+    , currentVelocity = (0, 0)
 
     , characterController = Controller { port = 0, actions = [] }
 
