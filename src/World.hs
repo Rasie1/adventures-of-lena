@@ -5,6 +5,7 @@ import Drawable
 import Data.Maybe
 import Character
 import Types
+import Data.Array
 
 instance Drawable World where
     render c r t world = do render c r t (level world)
@@ -20,15 +21,20 @@ mkWorld lvl = World
     }
 
 spawnCharacters :: Level -> [Character]
-spawnCharacters lvl = [player]
+spawnCharacters lvl = 
+    mapMaybe tileToCharacter (assocs (tiles lvl))
+
+tileToCharacter ((x, y), Player) = 
+        Just (player { currentPosition = (fromIntegral x, fromIntegral y) })
+tileToCharacter _ = Nothing
 
 player = Character 
     { moveSpeed  = 3
     , radius     = 0.5
     , inertia    = 0.1
-    , jumpHeight = 1
+    , jumpHeight = 5
 
-    , currentPosition = (3, 3)
+    , currentPosition = (0, 0)
     , currentSpeed    = (0, 0)
 
     , characterController = Controller { port = 0, actions = [] }

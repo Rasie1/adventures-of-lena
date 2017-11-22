@@ -18,8 +18,8 @@ instance Drawable Level where
           tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
-          getTilesheetCoords Sky = (288, 416)
           getTilesheetCoords Grass = (0, 192)
+          getTilesheetCoords _ = (288, 416)
 
           renderTile x y t camera
             = SDL.copy renderer texture
