@@ -36,3 +36,6 @@ moveTo (x, y) (SDL.Rectangle _ d) = SDL.Rectangle (mkPoint x y) d
 
 pointPlus :: (Double, Double) -> (Double, Double) -> (Double, Double) 
 pointPlus (x, y) (a, b) = (x + a, y + b)
+
+getRectPosition :: SDL.Rectangle a -> (a, a)
+getRectPosition (SDL.Rectangle (SDL.P (SDL.V2 x y)) d) = (x, y)

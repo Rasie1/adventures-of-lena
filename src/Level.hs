@@ -21,10 +21,18 @@ instance Drawable Level where
           getTilesheetCoords _ = (288, 416)
 
           renderTile x y t
-            = SDL.copy renderer texture
-                (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
-                (Just $ floor <$> applyCamera screen tileWidth camera (moveTo (fromIntegral x * tileWidth, 
-                                                                                   fromIntegral y * tileWidth) tileRect))
+            = if shouldCull then return ()
+                            else SDL.copy renderer texture src dst
+              where src = Just $ floor <$> moveTo (getTilesheetCoords t) tileRect
+                    dst = Just $ floor <$> dstRect
+                    dstRect = applyCamera screen tileWidth camera (moveTo dstCoords tileRect)
+                    dstCoordX = fromIntegral x * tileWidth
+                    dstCoordY = fromIntegral y * tileWidth
+                    dstCoords = (dstCoordX, dstCoordY)
+                    dstPosX = fst $ getRectPosition dstRect
+                    dstPosY = snd $ getRectPosition dstRect
+                    shouldCull = dstPosX + tileWidth < 0 || dstPosX > fst screen
+                              || dstPosY + tileWidth < 0 || dstPosY > snd screen
 
 
 loadLevel :: String -> Level

@@ -133,6 +133,9 @@ instance Drawable Character where
           getTilesheetCoords = (192, 192)
 
           renderSprite (x, y)
-            = SDL.copy renderer texture
-                (Just $ floor <$> moveTo getTilesheetCoords tileRect)
-                (Just $ floor <$> applyCamera screen tileWidth camera (moveTo (x * tileWidth, y * tileWidth) tileRect))
+            = SDL.copy renderer texture src dst
+              where src = Just $ floor <$> moveTo getTilesheetCoords tileRect
+                    dst = Just $ floor <$> applyCamera screen tileWidth camera (moveTo dstPos tileRect)
+                    dstPosX = x * tileWidth
+                    dstPosY = y * tileWidth
+                    dstPos = (dstPosX, dstPosY)
