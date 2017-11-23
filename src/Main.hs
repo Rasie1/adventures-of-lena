@@ -23,8 +23,10 @@ import System.Clock
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
 
--- resolution = (1920, 1080)
-resolution = (800, 600)
+screenx = 800
+screeny = 600
+resolution = (screenx, screeny)
+resolutionDouble = (fromIntegral screenx, fromIntegral screeny)
 
 main :: IO ()
 main = withSDL $ withSDLImage $ do
@@ -51,7 +53,7 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
-                            >>= renderFrame r t
+                            >>= renderFrame resolutionDouble r t . updateCamera
 
       runApp update initialGameState
 
@@ -59,19 +61,19 @@ main = withSDL $ withSDLImage $ do
 
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()
-runApp update = repeatUntil update (isNothing . world)
+runApp update = repeatUntil update shutdown
 
 repeatUntil :: (Monad m) => (a -> m a) -> (a -> Bool) -> a -> m ()
 repeatUntil f p = go
   where go a = f a >>= \b -> unless (p b) (go b)
 
 updateGame :: DeltaTime -> GameState -> IO GameState
-updateGame dt state = return state { world = world state >>= updateWorld dt }
+updateGame dt state = return state { world = updateWorld dt $ world state }
 
 applyIntentToGameState :: Intent -> GameState -> GameState
-applyIntentToGameState i s@GameState { world = Just w@World { characters = (player:xs) } } = 
-        s { world = Just w { characters = (applyIntent i player):xs } }
-applyIntentToGameState Quit s = quitGameState s
+applyIntentToGameState i s@GameState { world = w@World { characters = (player:xs) } } = 
+        s { world = w { characters = (applyIntent i player):xs } }
+applyIntentToGameState Quit s = s
 applyIntentToGameState _ s    = s
 
 handleInput :: GameState -> [SDL.Event] -> GameState

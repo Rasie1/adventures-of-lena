@@ -2,6 +2,7 @@ module Types where
 
 import Data.Array
 
+type ScreenSize = (Double, Double)
 type Camera = (Double, Double)
 type Position = (Double, Double)
 type Velocity = (Double, Double)

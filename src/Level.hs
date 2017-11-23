@@ -9,11 +9,10 @@ import qualified SDL
 import Types
 
 instance Drawable Level where
-    render camera renderer (texture, ti) lvl = do
+    render screen camera renderer (texture, ti) lvl = do
         forM_ (assocs (tiles lvl)) $ \((i, j), tile) ->
-          renderTile i j tile camera
+          renderTile i j tile
         where
-          tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
 
@@ -21,10 +20,11 @@ instance Drawable Level where
           getTilesheetCoords Grass = (0, 192)
           getTilesheetCoords _ = (288, 416)
 
-          renderTile x y t camera
+          renderTile x y t
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo (getTilesheetCoords t) tileRect)
-                (Just $ floor <$> applyCamera camera (moveTo (fromIntegral x * tileWidth, fromIntegral y * tileWidth) tileRect))
+                (Just $ floor <$> applyCamera screen tileWidth camera (moveTo (fromIntegral x * tileWidth, 
+                                                                                   fromIntegral y * tileWidth) tileRect))
 
 
 loadLevel :: String -> Level

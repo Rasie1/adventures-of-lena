@@ -8,11 +8,11 @@ import Types
 import Data.Array
 
 instance Drawable World where
-    render c r t world = do render c r t (level world)
-                            mapM_ (render c r t) (characters world)
+    render s c r t world = do render s c r t (level world)
+                              mapM_ (render s c r t) (characters world)
 
-updateWorld :: Double -> World -> Maybe World
-updateWorld dt w = Just w { characters = mapMaybe (updateCharacter dt w) (characters w) }
+updateWorld :: Double -> World -> World
+updateWorld dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
 
 mkWorld :: Level -> World
 mkWorld lvl = World 

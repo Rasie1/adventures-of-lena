@@ -120,10 +120,9 @@ updateCharacter dt world ch = Just . updatePosition dt
                            . move $ ch
 
 instance Drawable Character where
-    render camera renderer (texture, ti) character = do
-        renderSprite pos camera
+    render screen camera renderer (texture, ti) character = do
+        renderSprite pos
         where
-          tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
 
@@ -133,7 +132,7 @@ instance Drawable Character where
           getTilesheetCoords :: (Num a) => (a, a)
           getTilesheetCoords = (192, 192)
 
-          renderSprite (x, y) camera
+          renderSprite (x, y)
             = SDL.copy renderer texture
                 (Just $ floor <$> moveTo getTilesheetCoords tileRect)
-                (Just $ floor <$> applyCamera camera (moveTo (x * tileWidth, y * tileWidth) tileRect))
+                (Just $ floor <$> applyCamera screen tileWidth camera (moveTo (x * tileWidth, y * tileWidth) tileRect))
