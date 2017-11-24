@@ -15,37 +15,40 @@ import Common
 
 import Control.Monad
 
+import Types
 import GameState
 import Drawable
 
-type ScreenSize = (Double, Double)
-
 renderFrame :: ScreenSize -> SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO (GameState)
 renderFrame screen renderer texture gameState = do
-  SDL.clear renderer
-  render screen (cameraPosition gameState) renderer texture (world gameState)
-  SDL.present renderer
-  return gameState
+    SDL.clear renderer
+    render screen 
+          (camera gameState)
+           renderer 
+           texture 
+          (world gameState)
+    SDL.present renderer
+    return gameState
 
 withSDL :: (MonadIO m) => m a -> m ()
 withSDL op = do
-  SDL.initialize []
-  void op
-  SDL.quit
+    SDL.initialize []
+    void op
+    SDL.quit
 
 withSDLImage :: (MonadIO m) => m a -> m ()
 withSDLImage op = do
-  SDL.Image.initialize []
-  void op
-  SDL.Image.quit
+    SDL.Image.initialize []
+    void op
+    SDL.Image.quit
 
 
 withWindow :: (MonadIO m) => Text -> (Int, Int) -> (SDL.Window -> m a) -> m ()
 withWindow title (x, y) op = do
-  w <- SDL.createWindow title p
-  SDL.showWindow w
-  void $ op w
-  SDL.destroyWindow w
+    w <- SDL.createWindow title p
+    SDL.showWindow w
+    void $ op w
+    SDL.destroyWindow w
 
     where
       p = SDL.defaultWindow { SDL.windowInitialSize = z }

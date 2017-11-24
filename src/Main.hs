@@ -3,6 +3,7 @@
 module Main (main) where
 
 import Common
+import Camera
 import Level
 import World
 import GameState
@@ -53,7 +54,8 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
-                            >>= renderFrame resolutionDouble r t . updateCamera
+                            >>= renderFrame resolutionDouble r t 
+                              . updateCamera
 
       runApp update initialGameState
 
