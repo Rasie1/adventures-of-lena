@@ -30,11 +30,11 @@ jump c@Character { jumping = True
 jump c@Character { jumping = True
                  , currentVelocity = (dx, dy)
                  , jumpPower       = jy
-                 , currentPosition = cp
+                 -- , currentPosition = cp
                  , falling = False } = c { jumping = False
                                          , falling = True
-                                         , currentPosition = cp `pointPlus` (0, -1)
-                                         , currentVelocity = (dx, dy - jy) }
+                                         -- , currentPosition = cp `pointPlus` (0, -1)
+                                         , currentVelocity = (dx, dy - jy * 10) }
 
 move :: Character -> Character
 move c@Character { moving = MovingLeft
@@ -47,73 +47,62 @@ move c@Character { moving = NotMoving
                  , currentVelocity = (dx, dy)
                  , moveVelocity = m } = c { currentVelocity = (0, dy)}
 
+
 updatePosition :: DeltaTime -> Character -> Character
 updatePosition dt c@Character { currentVelocity = (dx, dy)
                               , currentPosition = (x, y) } = 
     c { currentPosition = (x + dx * dt, y + dy * dt) }
 
-fall :: DeltaTime -> World -> Character -> Character
-fall dt World { level = Level { tiles = t } }
+updateCollisions :: World -> Character -> Character
+updateCollisions World { level = Level { tiles = t } }
         c@Character { radius = r
                     , currentPosition = (x, y)
                     , falling = isFalling
                     , currentVelocity = (dx, dy) } = 
-    applyXcollisions . applyYcollisions $ c
-    where stopy d c@Character { currentVelocity = (dx, dy) 
-                              , currentPosition = (x, y) } = 
-              c { currentVelocity = (dx, 0) 
-                , currentPosition = (x, y + d) }
-          stopx d c@Character { currentVelocity = (dx, dy) 
-                              , currentPosition = (x, y)} = 
-              c { currentVelocity = (0, dy)
-                , currentPosition = (x + d, y) }
-          applyGravity c@Character { currentVelocity = (dx, dy) } = 
-              c { currentVelocity = (dx, dy + characterGravity) 
-                , falling = True }
-          stand c = c { falling = False }
+        c { currentPosition = (newx, newy) 
+          , currentVelocity = (newdx, newdy)
+          , falling = newFalling }
+        
+        where
+          xl = x - r
+          xr = x + r
+          yt = y - r
+          yb = y + r
+          hitsb = isSolid (t ! (toCoord x, toCoord yb))
+          hitst = isSolid (t ! (toCoord x, toCoord yt))
+          hitsl = isSolid (t ! (toCoord xl, toCoord y))
+          hitsr = isSolid (t ! (toCoord xr, toCoord y))
+          toCoord = floor . (+0.0)
+          flatten = fromIntegral . toCoord 
+          newx = if hitsr then flatten xr - r
+                          else if hitsl then flatten (xl + 0.5) + r
+                                        else x
+          newy = if hitsb then flatten yb - r
+                          else if hitst then flatten (yt + 0.5) + r
+                                        else y
+          newdx = if hitsl && dx < 0.0 then 0
+                                       else if hitsr && dx > 0.0 then 0
+                                                                 else dx
+          newdy = if hitst && dy < 0.0 then 0
+                                       else if hitsb && dy > 0.0 then 0
+                                                                 else dy
+          newFalling = not hitsb
 
-          nextX = x + dx * dt 
-          nextY = y + dy * dt
-          nextXl = nextX - r
-          nextXr = nextX + r
-          nextYt = nextY - r + characterGravity
-          nextYb = nextY + r + characterGravity
 
-          alignDistance x old = ((fromIntegral . rounder $ x) - old)
-                                where rounder = if x > old then floor
-                                                           else ceiling
-
-          bumpedxl = checkBump (nextXl, y)
-          bumpedxr = checkBump (nextXr, y)
-          bumpedyt = checkBump (x, nextYt)
-          bumpedyb = checkBump (x, nextYb)
-          bumpxl = if bumpedxl
-                        then stopx (alignDistance nextXl (x - r))
-                        else id
-          bumpxr = if bumpedxr
-                        then stopx (alignDistance nextXr (x + r)) 
-                        else id
-          bumpyt = applyGravity .
-                     if bumpedyt
-                        then stopy (alignDistance nextYt (y - r))
-                        else id
-          bumpyb = if bumpedyb
-                        then stand . stopy (alignDistance nextYb (y + r))
-                        else applyGravity
-          applyXcollisions = if bumpedxl then bumpxl
-                                         else if bumpedxr then bumpxr
-                                                          else id
-          applyYcollisions = if bumpedyt then bumpyt
-                                         else if bumpedyb then bumpyb
-                                                          else applyGravity
-
-          checkBump (x, y) = isSolid (t ! (floor x, floor y)) 
+fall :: World -> Character -> Character
+fall World { level = Level { tiles = t } }
+        c@Character { radius = r
+                    , falling = isFalling
+                    , currentVelocity = (dx, dy) } = 
+    c { currentVelocity = (dx, dy + characterGravity) } 
 
 characterGravity = 0.3
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
-updateCharacter dt world ch = Just . updatePosition dt
-                           . fall dt world
+updateCharacter dt world ch = Just 
+                           . updateCollisions world
+                           . updatePosition dt
+                           . fall world
                            -- . activate world
                            -- . attack world
                            . jump 

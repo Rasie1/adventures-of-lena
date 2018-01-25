@@ -24,8 +24,8 @@ import System.Clock
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
 
-screenx = 800
-screeny = 600
+screenx = 1280
+screeny = 960
 resolution = (screenx, screeny)
 resolutionDouble = (fromIntegral screenx, fromIntegral screeny)
 

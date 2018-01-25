@@ -32,7 +32,7 @@ player = Character
     { moveVelocity = 3
     , radius       = 0.5
     , inertia      = 0.1
-    , jumpPower    = 5
+    , jumpPower    = 1
 
     , currentPosition = (0, 0)
     , currentVelocity = (0, 0)

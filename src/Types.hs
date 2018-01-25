@@ -39,6 +39,11 @@ data Intent
   | Action
   | Quit
 
+data Direction
+  = Up
+  | Right
+  | Down
+  | Left
 
 data Level = Level
     { tiles :: Array (Int, Int) Tile
