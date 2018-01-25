@@ -72,7 +72,7 @@ updateCollisions World { level = Level { tiles = t } }
           hitst = isSolid (t ! (toCoord x, toCoord yt))
           hitsl = isSolid (t ! (toCoord xl, toCoord y))
           hitsr = isSolid (t ! (toCoord xr, toCoord y))
-          toCoord = floor . (+0.0)
+          toCoord = floor
           flatten = fromIntegral . toCoord 
           newx = if hitsr then flatten xr - r
                           else if hitsl then flatten (xl + 0.5) + r
@@ -106,7 +106,15 @@ updateCharacter dt world ch = Just
                            -- . activate world
                            -- . attack world
                            . jump 
-                           . move $ ch
+                           . move 
+                           . applyBot BotMemory world $ ch
+
+applyBot :: BotMemory -> World -> Character -> Character
+applyBot m w 
+    c@Character { characterController = con@Controller { bot = maybeBot } } =
+        case maybeBot of 
+            Just b -> compose (map applyIntent (b m w c)) c
+            Nothing -> c
 
 instance Drawable Character where
     render screen camera renderer (texture, ti) character = do

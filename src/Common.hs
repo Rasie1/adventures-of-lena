@@ -39,3 +39,6 @@ pointPlus (x, y) (a, b) = (x + a, y + b)
 
 getRectPosition :: SDL.Rectangle a -> (a, a)
 getRectPosition (SDL.Rectangle (SDL.P (SDL.V2 x y)) d) = (x, y)
+
+compose :: [a -> a] -> a -> a
+compose = foldl (flip (.)) id

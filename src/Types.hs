@@ -26,10 +26,17 @@ data Character = Character
     , jumping   :: Bool
     }
 data MovePosition = MovingLeft | MovingRight | NotMoving
+
+
+type Bot = BotMemory -> World -> Character -> [Intent]
+data BotMemory = BotMemory
+
 data Controller = Controller
-    { port :: Int,
-      actions :: [Intent]
+    { port :: Int
+    , actions :: [Intent]
+    , bot :: Maybe Bot
     }
+
 data Intent
   = Idle
   | MoveLeft

@@ -20,6 +20,7 @@ executable game
                        Character
                        Rendering
                        Types
+                       Bot
   build-depends:       base
                      , sdl2
                      , sdl2-image
