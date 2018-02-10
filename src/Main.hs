@@ -34,7 +34,8 @@ main = withSDL $ withSDLImage $ do
   setHintQuality
   withWindow "Game" resolution $ \w ->
     withRenderer w $ \r -> do
-      t <- loadTextureWithInfo r "./assets/tiles.png"
+      levelTexture <- loadTextureWithInfo r "./assets/tiles.png"
+      characterTexture <- loadTextureWithInfo r "./assets/walk.png"
       levelString <- readFile "./assets/tiles.map"
 
       initialTime <- getTime Monotonic
@@ -54,12 +55,12 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
-                            >>= renderFrame resolutionDouble r t 
+                            >>= renderFrame resolutionDouble r levelTexture 
                               . updateCamera
 
       runApp update initialGameState
 
-      SDL.destroyTexture (fst t)
+      SDL.destroyTexture (fst levelTexture)
 
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()

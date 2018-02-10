@@ -2,6 +2,7 @@ module Types where
 
 import Data.Array
 import System.Clock
+import qualified SDL
 
 type ScreenSize = (Double, Double)
 type Position = (Double, Double)
@@ -80,4 +81,15 @@ data GameState = GameState
   , camera :: Camera
 
   , shutdown :: Bool
+  }
+
+data Sprite = Sprite {
+  , framesCount  :: Int
+  , currentFrame :: Int
+  , frameCoords  :: (Int, Int)
+  , frameSize    :: (Int, Int)
+  , gapBetweenFrames :: Int
+  , frameChangeTime :: Double
+  , spriteTexture :: SDL.Texture
+  , spriteTextureInfo :: SDL.TextureInfo
   }
