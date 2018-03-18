@@ -18,6 +18,7 @@ mkSprite framesCount' frameCoords' frameSize' unitSize' gapBetweenFrames' frameC
   , unitSize     = unitSize'
   , gapBetweenFrames  = gapBetweenFrames'
   , frameChangeTime   = frameChangeTime'
+  , timeSinceChange   = 0
   , spriteTexture     = texture
   , spritePosition = pos
   }
@@ -31,9 +32,17 @@ mkStaticSprite frameCoords' frameSize' unitSize' texture pos = Sprite
   , unitSize     = unitSize'
   , gapBetweenFrames  = 0
   , frameChangeTime   = 0
+  , timeSinceChange   = 0
   , spriteTexture     = texture
   , spritePosition    = pos
   }
+
+updateSprite :: DeltaTime -> Sprite -> Sprite
+updateSprite deltaTime sprite = let newTime = timeSinceChange sprite + deltaTime
+                                 in if newTime > frameChangeTime sprite 
+                                       then sprite { timeSinceChange = 0
+                                                   , currentFrame = mod (currentFrame sprite + 1) (framesCount sprite) }
+                                       else sprite { timeSinceChange = newTime }
 
 instance Drawable Sprite where
     render screen camera renderer sprite = do
@@ -42,12 +51,10 @@ instance Drawable Sprite where
           (texture, ti) = spriteTexture sprite
           tileWidth = fromIntegral . fst $ frameSize sprite
           tileRect = mkRect 0 0 tileWidth tileWidth
-          getTilesheetCoords :: (Num a) => (a, a)
-          getTilesheetCoords = (0, 0)
 
           renderSprite (x, y)
             = SDL.copy renderer texture src dst
-              where src = Just $ floor <$> moveTo getTilesheetCoords tileRect
+              where src = Just $ floor <$> moveTo (tileWidth * fromIntegral (currentFrame sprite), 0.0) tileRect
                     dst = Just $ floor <$> applyCamera screen (unitSize sprite) camera (moveTo dstPos tileRect)
                     dstPosX = x * (unitSize sprite)
                     dstPosY = y * (unitSize sprite)

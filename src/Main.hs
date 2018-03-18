@@ -46,7 +46,19 @@ main = withSDL $ withSDLImage $ do
 
       initialTime <- getTime Monotonic
 
-      let characterSprite = (mkStaticSprite (0, 0) (48, 48) unitSize characterTexture (0, 0)) { framesCount = 8 }
+      let characterSprite = Sprite { 
+            framesCount  = 8
+          , currentFrame = 0
+          , frameCoords  = (0, 0)
+          , frameSize    = (48, 48)
+          , unitSize     = unitSize
+          , gapBetweenFrames  = 0
+          , frameChangeTime   = 0.2
+          , timeSinceChange   = 0
+          , spriteTexture     = characterTexture
+          , spritePosition    = (0, 0)
+          }
+
       let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture) characterSprite) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
