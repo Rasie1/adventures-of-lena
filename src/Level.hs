@@ -9,10 +9,11 @@ import qualified SDL
 import Types
 
 instance Drawable Level where
-    render screen camera renderer (texture, ti) lvl = do
+    render screen camera renderer lvl = do
         forM_ (assocs (tiles lvl)) $ \((i, j), tile) ->
           renderTile i j tile
         where
+          (texture, ti) = levelTexture lvl
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           tileRect = mkRect 0 0 tileWidth tileWidth
 
@@ -35,8 +36,8 @@ instance Drawable Level where
                               || dstPosY + tileWidth < 0 || dstPosY > snd screen
 
 
-loadLevel :: String -> Level
-loadLevel s = Level $ array ((0, 0), (levelWidth, levelHeight)) arrayElements
+loadLevel :: String -> (SDL.Texture, SDL.TextureInfo) -> Level
+loadLevel s t = Level (array ((0, 0), (levelWidth, levelHeight)) arrayElements) t
             where 
                   arrayElements :: [((Int, Int), Tile)]
                   arrayElements = foldl f [] numberedRows

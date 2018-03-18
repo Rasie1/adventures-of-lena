@@ -7,6 +7,7 @@ import Types
 import Level
 import qualified SDL
 import Data.Array
+import Sprite
 
 applyVelocity :: DeltaTime -> Position -> Velocity -> Position
 applyVelocity dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
@@ -117,22 +118,9 @@ applyBot m w
             Nothing -> c
 
 instance Drawable Character where
-    render screen camera renderer (texture, ti) character = do
-        renderSprite pos
-        where
-          tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
-          tileRect = mkRect 0 0 tileWidth tileWidth
+    render screen camera renderer character = do
+        render screen camera renderer sprite
+            where sprite = (characterSprite character) { spritePosition = pos }
+                  pos = currentPosition character `pointPlus` (- radius character,
+                                                               - radius character)
 
-          pos = currentPosition character `pointPlus` (- radius character,
-                                                       - radius character)
-
-          getTilesheetCoords :: (Num a) => (a, a)
-          getTilesheetCoords = (192, 192)
-
-          renderSprite (x, y)
-            = SDL.copy renderer texture src dst
-              where src = Just $ floor <$> moveTo getTilesheetCoords tileRect
-                    dst = Just $ floor <$> applyCamera screen tileWidth camera (moveTo dstPos tileRect)
-                    dstPosX = x * tileWidth
-                    dstPosY = y * tileWidth
-                    dstPos = (dstPosX, dstPosY)

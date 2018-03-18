@@ -25,6 +25,8 @@ data Character = Character
     , using     :: Bool
     , attacking :: Bool
     , jumping   :: Bool
+
+    , characterSprite :: Sprite
     }
 data MovePosition = MovingLeft | MovingRight | NotMoving
 
@@ -55,7 +57,8 @@ data Direction
 
 data Level = Level
     { tiles :: Array (Int, Int) Tile
-    } deriving Show
+    , levelTexture :: (SDL.Texture, SDL.TextureInfo)
+    }
 data Tile = Sky | Grass | Player | Enemy deriving Show
 
 data World = World
@@ -83,13 +86,13 @@ data GameState = GameState
   , shutdown :: Bool
   }
 
-data Sprite = Sprite {
-  , framesCount  :: Int
+data Sprite = Sprite 
+  { framesCount  :: Int
   , currentFrame :: Int
   , frameCoords  :: (Int, Int)
   , frameSize    :: (Int, Int)
   , gapBetweenFrames :: Int
   , frameChangeTime :: Double
-  , spriteTexture :: SDL.Texture
-  , spriteTextureInfo :: SDL.TextureInfo
+  , spriteTexture :: (SDL.Texture, SDL.TextureInfo)
+  , spritePosition :: Position
   }

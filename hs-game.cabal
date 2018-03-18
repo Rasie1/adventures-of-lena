@@ -21,6 +21,7 @@ executable game
                        Rendering
                        Types
                        Bot
+                       Sprite
   build-depends:       base
                      , sdl2
                      , sdl2-image

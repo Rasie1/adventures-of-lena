@@ -18,14 +18,14 @@ import Control.Monad
 import Types
 import GameState
 import Drawable
+import Sprite
 
-renderFrame :: ScreenSize -> SDL.Renderer -> (SDL.Texture, SDL.TextureInfo) -> GameState -> IO (GameState)
-renderFrame screen renderer texture gameState = do
+renderFrame :: ScreenSize -> SDL.Renderer -> GameState -> IO (GameState)
+renderFrame screen renderer gameState = do
     SDL.clear renderer
     render screen 
           (camera gameState)
            renderer 
-           texture 
           (world gameState)
     SDL.present renderer
     return gameState

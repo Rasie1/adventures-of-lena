@@ -12,6 +12,7 @@ import Input
 import Actor
 import Character
 import Rendering
+import Sprite
 
 import qualified SDL
 
@@ -24,9 +25,13 @@ import System.Clock
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
 
+screenx :: Int
 screenx = 1280
+screeny :: Int
 screeny = 960
+resolution :: (Int, Int)
 resolution = (screenx, screeny)
+resolutionDouble :: (Double, Double)
 resolutionDouble = (fromIntegral screenx, fromIntegral screeny)
 
 main :: IO ()
@@ -35,12 +40,14 @@ main = withSDL $ withSDLImage $ do
   withWindow "Game" resolution $ \w ->
     withRenderer w $ \r -> do
       levelTexture <- loadTextureWithInfo r "./assets/tiles.png"
-      characterTexture <- loadTextureWithInfo r "./assets/walk.png"
+      characterTexture <- loadTextureWithInfo r "./assets/tiles.png"
       levelString <- readFile "./assets/tiles.map"
 
       initialTime <- getTime Monotonic
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString)) initialTime
+      let characterSprite :: Sprite
+          characterSprite = mkStaticSprite (0, 0) (0, 0) characterTexture (0, 0)
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture) characterSprite) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)
@@ -55,7 +62,7 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
-                            >>= renderFrame resolutionDouble r levelTexture 
+                            >>= renderFrame resolutionDouble r 
                               . updateCamera
 
       runApp update initialGameState
