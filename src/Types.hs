@@ -91,6 +91,7 @@ data Sprite = Sprite
   , currentFrame :: Int
   , frameCoords  :: (Int, Int)
   , frameSize    :: (Int, Int)
+  , unitSize     :: Double
   , gapBetweenFrames :: Int
   , frameChangeTime :: Double
   , spriteTexture :: (SDL.Texture, SDL.TextureInfo)

@@ -40,13 +40,13 @@ main = withSDL $ withSDLImage $ do
   withWindow "Game" resolution $ \w ->
     withRenderer w $ \r -> do
       levelTexture <- loadTextureWithInfo r "./assets/tiles.png"
-      characterTexture <- loadTextureWithInfo r "./assets/tiles.png"
+      let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24
+      characterTexture <- loadTextureWithInfo r "./assets/walk.png"
       levelString <- readFile "./assets/tiles.map"
 
       initialTime <- getTime Monotonic
 
-      let characterSprite :: Sprite
-          characterSprite = mkStaticSprite (0, 0) (0, 0) characterTexture (0, 0)
+      let characterSprite = (mkStaticSprite (0, 0) (48, 48) unitSize characterTexture (0, 0)) { framesCount = 8 }
       let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture) characterSprite) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
