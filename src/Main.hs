@@ -82,6 +82,28 @@ main = withSDL $ withSDLImage $ do
                                  , frameChangeTime   = 0.2
                                  , timeSinceChange   = 0
                                  , reversedFrames    = True
+                                 }),
+                     ("FallLeft",  
+                      SpriteInfo { framesCount  = 4
+                                 , currentFrame = 0
+                                 , frameCoords  = (569, 54)
+                                 , frameSize    = (45, 54)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = True
+                                 }),
+                     ("FallRight",  
+                      SpriteInfo { framesCount  = 4
+                                 , currentFrame = 0
+                                 , frameCoords  = (48, 54)
+                                 , frameSize    = (45, 54)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = True
                                  })
                     ]
       let characterSpriteSheet = SpriteSheet { sprites = Data.Map.fromList sprites

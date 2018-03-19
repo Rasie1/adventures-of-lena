@@ -42,8 +42,11 @@ updatePickups w = let p = findPlayer w
                         Money -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         _     -> w
 
+moneyMultiplier :: Int
+moneyMultiplier = 25
+
 addMoney :: World -> World
-addMoney w = w { money = money w + 10 }
+addMoney w = w { money = money w + moneyMultiplier }
 
 updateCharacters :: Double -> World -> World
 updateCharacters dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
