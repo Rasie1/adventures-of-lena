@@ -103,9 +103,12 @@ updateGraphics :: DeltaTime -> Character -> Character
 updateGraphics dt c@Character { moveVelocity = maxVel
                               , currentVelocity = (vx, _)
                               , characterSpriteSheet = s } = 
-    c { characterSpriteSheet = let updated = updateSpriteSheet dt s 
-                                in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx }
-                                                       updated }
+    c { characterSpriteSheet = 
+            let updated = updateSpriteSheet dt (updateState newState s)
+                newState = case signum vx of 1   -> "RunRight"
+                                             0   -> "RunRight"
+                                             (-1)-> "RunLeft"
+             in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx } updated }
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just 

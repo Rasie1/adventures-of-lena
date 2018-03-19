@@ -50,15 +50,28 @@ main = withSDL $ withSDLImage $ do
       initialTime <- getTime Monotonic
 
 
-      let sprites = [("RunLeft", SpriteInfo { framesCount  = 4
-                                            , currentFrame = 0
-                                            , frameCoords  = (48, 0)
-                                            , frameSize    = (48, 54)
-                                            , unitSize     = unitSize
-                                            , gapBetweenFrames  = 0
-                                            , frameChangeTime   = 0.2
-                                            , timeSinceChange   = 0
-                                            })
+      let sprites = [("RunRight", 
+                      SpriteInfo { framesCount  = 4
+                                 , currentFrame = 0
+                                 , frameCoords  = (48, 0)
+                                 , frameSize    = (48, 54)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
+                     ("RunLeft",  
+                      SpriteInfo { framesCount  = 4
+                                 , currentFrame = 0
+                                 , frameCoords  = (560, 0)
+                                 , frameSize    = (48, 54)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = True
+                                 })
                     ]
       let characterSpriteSheet = SpriteSheet { sprites = Data.Map.fromList sprites
                                              , currentSprite       = "RunLeft"

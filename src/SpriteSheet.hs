@@ -6,6 +6,7 @@ import Types
 import Camera
 import Drawable
 import Data.Map
+import Data.Text
 -- import Control.Lens
 
 -- makeLenses ''SpriteSheet
@@ -52,6 +53,9 @@ updateSpriteSheet deltaTime spriteSheet =
                                            (currentSprite spriteSheet) 
                                            (sprites spriteSheet) }
                                  
+updateState :: Text -> SpriteSheet -> SpriteSheet
+updateState key s = s { currentSprite = key }
+
 
 instance Drawable SpriteSheet where
     render screen camera renderer spriteSheet = do
