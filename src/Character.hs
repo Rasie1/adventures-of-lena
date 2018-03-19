@@ -102,7 +102,7 @@ characterGravity = 0.3
 updateGraphics :: DeltaTime -> Character -> Character
 updateGraphics dt c@Character { moveVelocity = maxVel
                               , currentVelocity = (vx, _)
-                              , characterSprite = s } = c { characterSprite = updateSprite dt s { frameChangeTime = 0.075 + maxVel - abs vx } }
+                              , characterSprite = s } = c { characterSprite = updateSprite dt s { frameChangeTime = 0.1 + maxVel - abs vx } }
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just 

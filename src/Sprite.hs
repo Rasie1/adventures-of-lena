@@ -49,12 +49,15 @@ instance Drawable Sprite where
         renderSprite (spritePosition sprite) 
         where
           (texture, ti) = spriteTexture sprite
-          tileWidth = fromIntegral . fst $ frameSize sprite
-          tileRect = mkRect 0 0 tileWidth tileWidth
+          tileWidth  = fromIntegral . fst $ frameSize sprite
+          tileHeight = fromIntegral . snd $ frameSize sprite
+          tileBeginX  = fromIntegral . fst $ frameCoords sprite
+          tileBeginY = fromIntegral . snd $ frameCoords sprite
+          tileRect = mkRect tileBeginX tileBeginY tileWidth tileHeight
 
           renderSprite (x, y)
             = SDL.copy renderer texture src dst
-              where src = Just $ floor <$> moveTo (tileWidth * fromIntegral (currentFrame sprite), 0.0) tileRect
+              where src = Just $ floor <$> moveBy (tileWidth * fromIntegral (currentFrame sprite), 0.0) tileRect
                     dst = Just $ floor <$> applyCamera screen (unitSize sprite) camera (moveTo dstPos tileRect)
                     dstPosX = x * (unitSize sprite)
                     dstPosY = y * (unitSize sprite)

@@ -57,7 +57,9 @@ data Direction
 
 data Level = Level
     { tiles :: Array (Int, Int) Tile
+
     , levelTexture :: (SDL.Texture, SDL.TextureInfo)
+    , levelUnitSize :: Double
     }
 data Tile = Sky | Grass | Player | Enemy deriving Show
 
@@ -91,7 +93,7 @@ data Sprite = Sprite
   , currentFrame :: Int
   , frameCoords  :: (Int, Int)
   , frameSize    :: (Int, Int)
-  , unitSize     :: Double
+  , unitSize    :: Double
   , gapBetweenFrames :: Int
   , frameChangeTime :: Double
   , timeSinceChange :: Double

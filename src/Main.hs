@@ -39,18 +39,19 @@ main = withSDL $ withSDLImage $ do
   setHintQuality
   withWindow "Game" resolution $ \w ->
     withRenderer w $ \r -> do
-      levelTexture <- loadTextureWithInfo r "./assets/tiles.png"
-      let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24
-      characterTexture <- loadTextureWithInfo r "./assets/walk.png"
-      levelString <- readFile "./assets/tiles.map"
+      let outputScale = 1.0
 
+      levelTexture <- loadTextureWithInfo r "./assets/tiles2.png"
+      let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24 * outputScale
+      characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
+      levelString <- readFile "./assets/tiles.map"
       initialTime <- getTime Monotonic
 
       let characterSprite = Sprite { 
-            framesCount  = 8
+            framesCount  = 4
           , currentFrame = 0
-          , frameCoords  = (0, 0)
-          , frameSize    = (48, 48)
+          , frameCoords  = (48, 0)
+          , frameSize    = (48, 54)
           , unitSize     = unitSize
           , gapBetweenFrames  = 0
           , frameChangeTime   = 0.2
@@ -59,7 +60,7 @@ main = withSDL $ withSDLImage $ do
           , spritePosition    = (0, 0)
           }
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture) characterSprite) initialTime
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture unitSize) characterSprite) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)
