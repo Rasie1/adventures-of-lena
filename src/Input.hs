@@ -11,7 +11,11 @@ payloadToIntent (SDL.KeyboardEvent k)    = keyEventToIntent k
 payloadToIntent _                        = Idle
 
 keyEventToIntent :: SDL.KeyboardEventData -> Intent
-keyEventToIntent (SDL.KeyboardEventData _ SDL.Released _ _) = Idle
+keyEventToIntent (SDL.KeyboardEventData _ SDL.Released _ keysym) = 
+  case SDL.keysymKeycode keysym of
+    SDL.KeycodeA      -> Stop
+    SDL.KeycodeD      -> Stop
+    _                 -> Idle
 keyEventToIntent (SDL.KeyboardEventData _ SDL.Pressed _ keysym) =
   case SDL.keysymKeycode keysym of
     SDL.KeycodeEscape -> Quit

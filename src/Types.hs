@@ -46,6 +46,7 @@ data Intent
   = Idle
   | MoveLeft
   | MoveRight
+  | Stop
   | Jump
   | Attack
   | Action

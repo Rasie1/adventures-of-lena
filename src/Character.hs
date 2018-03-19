@@ -16,7 +16,8 @@ cleanIntent :: Character -> Character
 cleanIntent c = c { moving = NotMoving }
 
 applyIntent :: Intent -> Character -> Character
-applyIntent Idle      c = c
+applyIntent Idle      c = c 
+applyIntent Stop      c = c { moving = NotMoving }
 applyIntent MoveLeft  c = c { moving = MovingLeft  }
 applyIntent MoveRight c = c { moving = MovingRight }
 applyIntent Jump      c = c { jumping = True }
@@ -120,7 +121,8 @@ updateCharacter dt world ch = Just
                            -- . attack world
                            . jump 
                            . move 
-                           . applyBot BotMemory world $ ch
+                           . applyBot BotMemory world 
+                                      $ ch
 
 applyBot :: BotMemory -> World -> Character -> Character
 applyBot m w 
