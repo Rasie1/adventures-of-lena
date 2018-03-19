@@ -18,7 +18,7 @@ import Control.Monad
 import Types
 import GameState
 import Drawable
-import Sprite
+import SpriteSheet
 
 renderFrame :: ScreenSize -> SDL.Renderer -> GameState -> IO (GameState)
 renderFrame screen renderer gameState = do

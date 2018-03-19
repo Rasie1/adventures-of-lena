@@ -12,11 +12,13 @@ import Input
 import Actor
 import Character
 import Rendering
-import Sprite
+import SpriteSheet
 
 import qualified SDL
 
 import Data.Maybe
+import qualified Data.Map
+import Data.Text hiding (foldl')
 import Data.Foldable          
 import Control.Monad
 
@@ -47,20 +49,24 @@ main = withSDL $ withSDLImage $ do
       levelString <- readFile "./assets/tiles.map"
       initialTime <- getTime Monotonic
 
-      let characterSprite = Sprite { 
-            framesCount  = 4
-          , currentFrame = 0
-          , frameCoords  = (48, 0)
-          , frameSize    = (48, 54)
-          , unitSize     = unitSize
-          , gapBetweenFrames  = 0
-          , frameChangeTime   = 0.2
-          , timeSinceChange   = 0
-          , spriteTexture     = characterTexture
-          , spritePosition    = (0, 0)
-          }
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture unitSize) characterSprite) initialTime
+      let sprites = [("RunLeft", SpriteInfo { framesCount  = 4
+                                            , currentFrame = 0
+                                            , frameCoords  = (48, 0)
+                                            , frameSize    = (48, 54)
+                                            , unitSize     = unitSize
+                                            , gapBetweenFrames  = 0
+                                            , frameChangeTime   = 0.2
+                                            , timeSinceChange   = 0
+                                            })
+                    ]
+      let characterSpriteSheet = SpriteSheet { sprites = Data.Map.fromList sprites
+                                             , currentSprite       = "RunLeft"
+                                             , spriteSheetTexture  = characterTexture
+                                             , spriteSheetPosition = (0, 0)
+                                             }
+
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture unitSize) characterSpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)

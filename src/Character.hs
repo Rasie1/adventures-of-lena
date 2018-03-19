@@ -7,7 +7,7 @@ import Types
 import Level
 import qualified SDL
 import Data.Array
-import Sprite
+import SpriteSheet
 
 applyVelocity :: DeltaTime -> Position -> Velocity -> Position
 applyVelocity dt (posx, posy) (spdx, spdy) = (posx + spdx * dt, posy + spdy * dt)
@@ -102,7 +102,10 @@ characterGravity = 0.3
 updateGraphics :: DeltaTime -> Character -> Character
 updateGraphics dt c@Character { moveVelocity = maxVel
                               , currentVelocity = (vx, _)
-                              , characterSprite = s } = c { characterSprite = updateSprite dt s { frameChangeTime = 0.1 + maxVel - abs vx } }
+                              , characterSpriteSheet = s } = 
+    c { characterSpriteSheet = let updated = updateSpriteSheet dt s 
+                                in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx }
+                                                       updated }
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just 
@@ -125,8 +128,8 @@ applyBot m w
 
 instance Drawable Character where
     render screen camera renderer character = do
-        render screen camera renderer sprite
-            where sprite = (characterSprite character) { spritePosition = pos }
+        render screen camera renderer spriteSheet
+            where spriteSheet = (characterSpriteSheet character) { spriteSheetPosition = pos }
                   pos = currentPosition character `pointPlus` (- radius character,
                                                                - radius character)
 

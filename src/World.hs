@@ -15,23 +15,23 @@ instance Drawable World where
 updateWorld :: Double -> World -> World
 updateWorld dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
 
-mkWorld :: Level -> Sprite -> World
-mkWorld lvl sprite = World 
+mkWorld :: Level -> SpriteSheet -> World
+mkWorld lvl spriteSheet = World 
     { level = lvl
-    , characters = spawnCharacters lvl sprite
+    , characters = spawnCharacters lvl spriteSheet
     }
 
-spawnCharacters :: Level -> Sprite -> [Character]
-spawnCharacters lvl sprite = 
-    mapMaybe (tileToCharacter sprite) (assocs (tiles lvl))
+spawnCharacters :: Level -> SpriteSheet -> [Character]
+spawnCharacters lvl spriteSheet = 
+    mapMaybe (tileToCharacter spriteSheet) (assocs (tiles lvl))
 
-tileToCharacter sprite ((x, y), Player) = 
-        Just ((player sprite) { currentPosition = (fromIntegral x, fromIntegral y) })
-tileToCharacter sprite ((x, y), Enemy) = 
-        Just ((enemy sprite) { currentPosition = (fromIntegral x, fromIntegral y) })
+tileToCharacter spriteSheet ((x, y), Player) = 
+        Just ((player spriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+tileToCharacter spriteSheet ((x, y), Enemy) = 
+        Just ((enemy spriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
 tileToCharacter _ _ = Nothing
 
-anyCharacter sprite = Character 
+anyCharacter spriteSheet = Character 
     { moveVelocity = 3
     , radius       = 0.5
     , inertia      = 0.1
@@ -48,9 +48,9 @@ anyCharacter sprite = Character
     , attacking = False
     , jumping   = False
 
-    , characterSprite = sprite
+    , characterSpriteSheet = spriteSheet
     }
 
 player = anyCharacter
 
-enemy sprite = (anyCharacter sprite) { characterController = Controller { port = 1, actions = [], bot = Just simpleMoveBot } }
+enemy spriteSheet = (anyCharacter spriteSheet) { characterController = Controller { port = 1, actions = [], bot = Just simpleMoveBot } }

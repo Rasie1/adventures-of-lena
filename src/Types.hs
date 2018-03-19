@@ -3,6 +3,8 @@ module Types where
 import Data.Array
 import System.Clock
 import qualified SDL
+import Data.Map
+import Data.Text
 
 type ScreenSize = (Double, Double)
 type Position = (Double, Double)
@@ -26,7 +28,7 @@ data Character = Character
     , attacking :: Bool
     , jumping   :: Bool
 
-    , characterSprite :: Sprite
+    , characterSpriteSheet :: SpriteSheet
     }
 data MovePosition = MovingLeft | MovingRight | NotMoving
 
@@ -88,15 +90,21 @@ data GameState = GameState
   , shutdown :: Bool
   }
 
-data Sprite = Sprite 
+data SpriteInfo = SpriteInfo 
   { framesCount  :: Int
   , currentFrame :: Int
   , frameCoords  :: (Int, Int)
   , frameSize    :: (Int, Int)
-  , unitSize    :: Double
+  , unitSize     :: Double
   , gapBetweenFrames :: Int
-  , frameChangeTime :: Double
-  , timeSinceChange :: Double
-  , spriteTexture :: (SDL.Texture, SDL.TextureInfo)
-  , spritePosition :: Position
+  , frameChangeTime  :: Double
+  , timeSinceChange  :: Double
+  , reversedFrames   :: Bool
+  }
+
+data SpriteSheet = SpriteSheet 
+  { sprites :: Map Text SpriteInfo
+  , currentSprite :: Text
+  , spriteSheetTexture :: (SDL.Texture, SDL.TextureInfo)
+  , spriteSheetPosition :: Position
   }

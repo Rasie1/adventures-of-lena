@@ -21,13 +21,15 @@ executable game
                        Rendering
                        Types
                        Bot
-                       Sprite
+                       SpriteSheet
   build-depends:       base
                      , sdl2
                      , sdl2-image
                      , monad-loops
                      , text
                      , array
+                     , lens
+                     , containers
                      , clock
                      , formatting
   default-language:    Haskell2010
