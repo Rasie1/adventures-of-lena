@@ -60,11 +60,23 @@ data Direction
 
 data Level = Level
     { tiles :: Array (Int, Int) Tile
-
     , levelTexture :: (SDL.Texture, SDL.TextureInfo)
     , levelUnitSize :: Double
     }
-data Tile = Sky | Grass | Player | Enemy deriving Show
+data Tile = Sky 
+          | Grass 
+          | Player 
+          | Enemy 
+          | Money 
+          | RedDye 
+          | BlueDye 
+          | GreenDye 
+          deriving Show
+
+data Pickup = MoneyPickup
+            | RedDyePickup
+            | BlueDyePickup
+            | GreenDyePickup
 
 data World = World
   { level :: Level
@@ -87,6 +99,7 @@ data GameState = GameState
   , lastFPSPrintTime        :: TimeSpec
 
   , camera :: Camera
+  , money  :: Int
 
   , shutdown :: Bool
   }

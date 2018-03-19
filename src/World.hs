@@ -1,5 +1,6 @@
 module World where
 
+import Common
 import Level
 import Drawable
 import Data.Maybe
@@ -12,8 +13,10 @@ instance Drawable World where
     render s c r world = do render s c r (level world)
                             mapM_ (render s c r) (characters world)
 
+
 updateWorld :: Double -> World -> World
-updateWorld dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
+updateWorld dt = updatePickups
+               . updateCharacters dt
 
 mkWorld :: Level -> SpriteSheet -> World
 mkWorld lvl spriteSheet = World 
@@ -24,6 +27,22 @@ mkWorld lvl spriteSheet = World
 spawnCharacters :: Level -> SpriteSheet -> [Character]
 spawnCharacters lvl spriteSheet = 
     mapMaybe (tileToCharacter spriteSheet) (assocs (tiles lvl))
+
+findPlayer :: World -> Character
+findPlayer = head . characters
+
+updatePickups :: World -> World
+updatePickups w = let p = findPlayer w
+                      t = tiles $ level w
+                      toCoord (x, y) = (floor x, floor y)
+                      pos = currentPosition p `pointPlus` (- radius p, - radius p)
+                      tile = t ! (toCoord pos) 
+                   in case tile of 
+                        _ -> w
+
+
+updateCharacters :: Double -> World -> World
+updateCharacters dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
 
 tileToCharacter spriteSheet ((x, y), Player) = 
         Just ((player spriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })

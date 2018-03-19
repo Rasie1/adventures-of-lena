@@ -20,6 +20,7 @@ instance Drawable Level where
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
           getTilesheetCoords Grass = (0, 288)
+          getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
 
           renderTile x y t
@@ -60,6 +61,10 @@ toTile :: Char -> Tile
 toTile 'g' = Grass
 toTile 'p' = Player
 toTile 'e' = Enemy
+toTile 'm' = Money
+toTile '1' = RedDye
+toTile '2' = BlueDye
+toTile '3' = GreenDye
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
@@ -67,4 +72,4 @@ isSolid Sky = False
 isSolid Grass = True
 isSolid Player = False
 isSolid Enemy = False
-
+isSolid _ = False
