@@ -61,6 +61,17 @@ main = withSDL $ withSDLImage $ do
                                  , timeSinceChange   = 0
                                  , reversedFrames    = False
                                  }),
+                     ("Stand", 
+                      SpriteInfo { framesCount  = 1
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 0)
+                                 , frameSize    = (48, 54)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 1
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
                      ("RunLeft",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0

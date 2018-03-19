@@ -106,7 +106,7 @@ updateGraphics dt c@Character { moveVelocity = maxVel
     c { characterSpriteSheet = 
             let updated = updateSpriteSheet dt (updateState newState s)
                 newState = case signum vx of 1   -> "RunRight"
-                                             0   -> "RunRight"
+                                             0   -> "Stand"
                                              (-1)-> "RunLeft"
              in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx } updated }
 
