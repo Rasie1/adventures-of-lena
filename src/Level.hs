@@ -57,6 +57,9 @@ loadLevel s t unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arrayE
                   
                   g i (j, tile) = ((j, i), tile)
 
+removeTile :: (Int, Int) -> Level -> Level
+removeTile pos lvl = lvl { tiles = tiles lvl // [(pos, Sky)] }
+
 toTile :: Char -> Tile
 toTile 'g' = Grass
 toTile 'p' = Player

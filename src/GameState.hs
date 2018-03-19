@@ -21,6 +21,5 @@ mkGameState w time = GameState
 
   , framesSinceLastFPSPrint = 0
   , lastFPSPrintTime = time
-  , money = 0
   , shutdown = False
   }

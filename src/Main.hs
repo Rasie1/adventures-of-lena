@@ -93,7 +93,7 @@ main = withSDL $ withSDLImage $ do
       let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture unitSize) characterSpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
-                                     then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state)
+                                     then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state) ++ ", ₽" ++ (show . money . world) state
                                              return state { framesSinceLastFPSPrint = 0
                                                           , lastFPSPrintTime = time }
                                      else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }

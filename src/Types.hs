@@ -81,6 +81,7 @@ data Pickup = MoneyPickup
 data World = World
   { level :: Level
   , characters :: [Character]
+  , money  :: Int
   }
 
 data Camera = Camera 
@@ -99,7 +100,6 @@ data GameState = GameState
   , lastFPSPrintTime        :: TimeSpec
 
   , camera :: Camera
-  , money  :: Int
 
   , shutdown :: Bool
   }

@@ -22,6 +22,7 @@ mkWorld :: Level -> SpriteSheet -> World
 mkWorld lvl spriteSheet = World 
     { level = lvl
     , characters = spawnCharacters lvl spriteSheet
+    , money = 0
     }
 
 spawnCharacters :: Level -> SpriteSheet -> [Character]
@@ -35,11 +36,14 @@ updatePickups :: World -> World
 updatePickups w = let p = findPlayer w
                       t = tiles $ level w
                       toCoord (x, y) = (floor x, floor y)
-                      pos = currentPosition p `pointPlus` (- radius p, - radius p)
+                      pos = currentPosition p
                       tile = t ! (toCoord pos) 
                    in case tile of 
-                        _ -> w
+                        Money -> addMoney w { level = removeTile (toCoord pos) (level w) }
+                        _     -> w
 
+addMoney :: World -> World
+addMoney w = w { money = money w + 10 }
 
 updateCharacters :: Double -> World -> World
 updateCharacters dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
