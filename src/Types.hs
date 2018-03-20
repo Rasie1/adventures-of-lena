@@ -66,14 +66,18 @@ data Level = Level
     }
 
 data Tile = Sky 
-          | Grass
-          | GrassTop1
-          | GrassTop2
-          | GrassCenter
-          | GrassLeft
-          | GrassRight
-          | GrassBottom1
-          | GrassBottom2
+          | GroundTop1
+          | GroundTop2
+          | GroundTopLeft
+          | GroundTopRight
+          | GroundCenter1
+          | GroundCenter2
+          | GroundLeft
+          | GroundRight
+          | GroundBottomLeft
+          | GroundBottomRight
+          | GroundBottom1
+          | GroundBottom2
           | Player 
           | Enemy 
           | Money 

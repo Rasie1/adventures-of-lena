@@ -21,7 +21,19 @@ instance Drawable Level where
           tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
-          getTilesheetCoords Grass = (0, 288)
+          getTilesheetCoords GroundTop1 = (48, 48)
+          getTilesheetCoords GroundTop2 = (96, 48)
+          getTilesheetCoords GroundTopLeft = (0, 48)
+          getTilesheetCoords GroundTopRight = (144, 48)
+          getTilesheetCoords GroundCenter1 = (48, 96)
+          getTilesheetCoords GroundCenter2 = (96, 96)
+          getTilesheetCoords GroundLeft = (0, 96)
+          getTilesheetCoords GroundRight = (144, 96)
+          getTilesheetCoords GroundBottomLeft = (0, 144)
+          getTilesheetCoords GroundBottomRight = (144, 144)
+          getTilesheetCoords GroundBottom1 = (48, 144)
+          getTilesheetCoords GroundBottom2 = (96, 144)
+
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
 
@@ -69,9 +81,20 @@ removeTile :: (Int, Int) -> Level -> Level
 removeTile pos lvl = lvl { tiles = tiles lvl // [(pos, Sky)] }
 
 toTile :: Char -> Tile
-toTile 'g' = Grass
+toTile 'w' = GroundTop1
+toTile 'e' = GroundTop2
+toTile 'q' = GroundTopLeft
+toTile 'r' = GroundTopRight
+toTile 's' = GroundCenter1
+toTile 'd' = GroundCenter2
+toTile 'a' = GroundLeft
+toTile 'f' = GroundRight
+toTile 'z' = GroundBottomLeft
+toTile 'v' = GroundBottomRight
+toTile 'x' = GroundBottom1
+toTile 'c' = GroundBottom2
 toTile 'p' = Player
-toTile 'e' = Enemy
+toTile 'o' = Enemy
 toTile 'm' = Money
 toTile '1' = RedDye
 toTile '2' = BlueDye
@@ -80,7 +103,18 @@ toTile _ = Sky
 
 isSolid :: Tile -> Bool
 isSolid Sky = False
-isSolid Grass = True
+isSolid GroundTop1 = True
+isSolid GroundTop2 = True
+isSolid GroundTopLeft = True
+isSolid GroundTopRight = True
+isSolid GroundCenter1 = True
+isSolid GroundCenter2 = True
+isSolid GroundLeft = True
+isSolid GroundRight = True
+isSolid GroundBottomLeft = True
+isSolid GroundBottomRight = True
+isSolid GroundBottom1 = True
+isSolid GroundBottom2 = True
 isSolid Player = False
 isSolid Enemy = False
 isSolid _ = False
