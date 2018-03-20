@@ -10,10 +10,12 @@ import Types
 
 instance Drawable Level where
     render screen camera renderer lvl = do
+        renderBackground
         forM_ (assocs (tiles lvl)) $ \((i, j), tile) ->
           renderTile i j tile
         where
           (texture, ti) = levelTexture lvl
+          (btexture, bti) = backgroundTexture lvl
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           unitSize = levelUnitSize lvl
           tileRect = mkRect 0 0 tileWidth tileWidth
@@ -22,6 +24,12 @@ instance Drawable Level where
           getTilesheetCoords Grass = (0, 288)
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
+
+          renderBackground = SDL.copy renderer 
+                                      btexture 
+                                      (Just (mkRect 0 0 (SDL.textureWidth bti) 
+                                                        (SDL.textureHeight bti)))
+                                      (Just (mkRect 0 0 1280 960))
 
           renderTile x y t
             = if shouldCull then return ()
@@ -38,8 +46,8 @@ instance Drawable Level where
                               || dstPosY + unitSize < 0 || dstPosY > snd screen
 
 
-loadLevel :: String -> (SDL.Texture, SDL.TextureInfo) -> Double -> Level
-loadLevel s t unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arrayElements) t unitSize
+loadLevel :: String -> (SDL.Texture, SDL.TextureInfo) -> (SDL.Texture, SDL.TextureInfo) -> Double -> Level
+loadLevel s t bt unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arrayElements) t bt unitSize
             where 
                   arrayElements :: [((Int, Int), Tile)]
                   arrayElements = foldl f [] numberedRows

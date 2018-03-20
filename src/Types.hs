@@ -61,10 +61,19 @@ data Direction
 data Level = Level
     { tiles :: Array (Int, Int) Tile
     , levelTexture :: (SDL.Texture, SDL.TextureInfo)
+    , backgroundTexture :: (SDL.Texture, SDL.TextureInfo)
     , levelUnitSize :: Double
     }
+
 data Tile = Sky 
-          | Grass 
+          | Grass
+          | GrassTop1
+          | GrassTop2
+          | GrassCenter
+          | GrassLeft
+          | GrassRight
+          | GrassBottom1
+          | GrassBottom2
           | Player 
           | Enemy 
           | Money 
@@ -72,11 +81,6 @@ data Tile = Sky
           | BlueDye 
           | GreenDye 
           deriving Show
-
-data Pickup = MoneyPickup
-            | RedDyePickup
-            | BlueDyePickup
-            | GreenDyePickup
 
 data World = World
   { level :: Level

@@ -43,6 +43,7 @@ main = withSDL $ withSDLImage $ do
     withRenderer w $ \r -> do
       let outputScale = 1.0
 
+      backgroundTexture <- loadTextureWithInfo r "./assets/sky.png"
       levelTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24 * outputScale
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
@@ -112,7 +113,7 @@ main = withSDL $ withSDLImage $ do
                                              , spriteSheetPosition = (0, 0)
                                              }
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture unitSize) characterSpriteSheet) initialTime
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture backgroundTexture unitSize) characterSpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state) ++ ", ₽" ++ (show . money . world) state
