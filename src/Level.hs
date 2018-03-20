@@ -21,6 +21,8 @@ instance Drawable Level where
           tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
+          getTilesheetCoords GroundThin1 = (0, 288)
+          getTilesheetCoords GroundThin2 = (96, 288)
           getTilesheetCoords GroundTop1 = (48, 48)
           getTilesheetCoords GroundTop2 = (96, 48)
           getTilesheetCoords GroundTopLeft = (0, 48)
@@ -33,6 +35,8 @@ instance Drawable Level where
           getTilesheetCoords GroundBottomRight = (144, 144)
           getTilesheetCoords GroundBottom1 = (48, 144)
           getTilesheetCoords GroundBottom2 = (96, 144)
+          getTilesheetCoords Spikes1 = (1056, 0)
+          getTilesheetCoords Spikes2 = (1056, 48)
 
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
@@ -83,6 +87,8 @@ removeTile pos lvl = lvl { tiles = tiles lvl // [(pos, Sky)] }
 toTile :: Char -> Tile
 toTile 'w' = GroundTop1
 toTile 'e' = GroundTop2
+toTile 'g' = GroundThin1
+toTile 'b' = GroundThin2
 toTile 'q' = GroundTopLeft
 toTile 'r' = GroundTopRight
 toTile 's' = GroundCenter1
@@ -99,12 +105,15 @@ toTile 'm' = Money
 toTile '1' = RedDye
 toTile '2' = BlueDye
 toTile '3' = GreenDye
+toTile 'h' = Spikes1
+toTile 'n' = Spikes2
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
-isSolid Sky = False
 isSolid GroundTop1 = True
 isSolid GroundTop2 = True
+isSolid GroundThin1 = True
+isSolid GroundThin2 = True
 isSolid GroundTopLeft = True
 isSolid GroundTopRight = True
 isSolid GroundCenter1 = True
@@ -115,6 +124,4 @@ isSolid GroundBottomLeft = True
 isSolid GroundBottomRight = True
 isSolid GroundBottom1 = True
 isSolid GroundBottom2 = True
-isSolid Player = False
-isSolid Enemy = False
 isSolid _ = False

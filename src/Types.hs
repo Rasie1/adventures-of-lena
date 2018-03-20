@@ -66,8 +66,12 @@ data Level = Level
     }
 
 data Tile = Sky 
+          | Spikes1
+          | Spikes2
           | GroundTop1
           | GroundTop2
+          | GroundThin1
+          | GroundThin2
           | GroundTopLeft
           | GroundTopRight
           | GroundCenter1
