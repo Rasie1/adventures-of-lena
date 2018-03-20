@@ -26,7 +26,10 @@ data Character = Character
     , falling   :: Bool
     , using     :: Bool
     , attacking :: Bool
+
     , jumping   :: Bool
+    , canJump   :: Bool
+    , timeToJump :: Double
 
     , characterSpriteSheet :: SpriteSheet
     }

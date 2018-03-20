@@ -2,7 +2,7 @@ resolver: lts-9.6
 packages:
   - .
 
-extra-deps: []
+extra-deps: [sdl2-mixer-1.1.0]
 
 flags: {}
 

@@ -26,17 +26,16 @@ applyIntent Action    c = c
 applyIntent Quit      c = c
 
 jump :: Character -> Character
-jump c@Character { jumping = False } = c
-jump c@Character { jumping = True
-                 , falling = True } = c { jumping = False }
+jump c@Character { canJump = False } = c { jumping = False }
 jump c@Character { jumping = True
                  , currentVelocity = (dx, dy)
                  , jumpPower       = jy
-                 -- , currentPosition = cp
-                 , falling = False } = c { jumping = False
+                 , canJump = True }  = c { jumping = False
                                          , falling = True
+                                         , canJump = False
                                          -- , currentPosition = cp `pointPlus` (0, -1)
                                          , currentVelocity = (dx, dy - jy * 10) }
+jump c = c
 
 move :: Character -> Character
 move c@Character { moving = MovingLeft
@@ -55,15 +54,18 @@ updatePosition dt c@Character { currentVelocity = (dx, dy)
                               , currentPosition = (x, y) } = 
     c { currentPosition = (x + dx * dt, y + dy * dt) }
 
-updateCollisions :: World -> Character -> Character
-updateCollisions World { level = Level { tiles = t } }
+updateCollisions :: DeltaTime -> World -> Character -> Character
+updateCollisions dt World { level = Level { tiles = t } }
         c@Character { radius = r
                     , currentPosition = (x, y)
                     , falling = isFalling
-                    , currentVelocity = (dx, dy) } = 
+                    , currentVelocity = (dx, dy)
+                    , canJump = oldCanJump } = 
         c { currentPosition = (newx, newy) 
           , currentVelocity = (newdx, newdy)
-          , falling = newFalling }
+          , falling = newFalling
+          , canJump = newCanJump
+          , timeToJump = newTimeToJump }
         
         where
           xl = x - r
@@ -89,6 +91,20 @@ updateCollisions World { level = Level { tiles = t } }
                                        else if hitsb && dy > 0.0 then 0
                                                                  else dy
           newFalling = not hitsb
+          defaultTimeToJump = 0.2
+          newTimeToJump = case (isFalling, newFalling) of
+                                (False, False) -> defaultTimeToJump
+                                (False, True)  -> defaultTimeToJump
+                                (True, True)   -> timeToJump c - dt
+                                (True, False)  -> defaultTimeToJump
+
+
+          newCanJump = if newTimeToJump < 0.0 
+                          then False 
+                          else if newTimeToJump == defaultTimeToJump
+                                  then True
+                                  else oldCanJump
+
 
 
 fall :: World -> Character -> Character
@@ -119,7 +135,7 @@ updateGraphics dt c@Character { moveVelocity = maxVel
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just 
                            . updateGraphics dt
-                           . updateCollisions world
+                           . updateCollisions dt world
                            . updatePosition dt
                            . fall world
                            -- . activate world

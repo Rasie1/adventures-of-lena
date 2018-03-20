@@ -18,16 +18,21 @@ updateWorld :: Double -> World -> World
 updateWorld dt = updatePickups
                . updateCharacters dt
 
-mkWorld :: Level -> SpriteSheet -> World
-mkWorld lvl spriteSheet = World 
+mkWorld :: Level -> SpriteSheet -> SpriteSheet -> World
+mkWorld lvl characterSpriteSheet enemySpriteSheet = World 
     { level = lvl
-    , characters = spawnCharacters lvl spriteSheet
+    , characters = spawnCharacters lvl characterSpriteSheet enemySpriteSheet
     , money = 0
     }
 
-spawnCharacters :: Level -> SpriteSheet -> [Character]
-spawnCharacters lvl spriteSheet = 
-    mapMaybe (tileToCharacter spriteSheet) (assocs (tiles lvl))
+spawnCharacters :: Level -> SpriteSheet -> SpriteSheet -> [Character]
+spawnCharacters lvl characterSpriteSheet enemySpriteSheet = 
+    mapMaybe tileToCharacter (assocs (tiles lvl))
+    where tileToCharacter ((x, y), Player) = 
+                Just ((player characterSpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+          tileToCharacter ((x, y), Enemy) = 
+                Just ((enemy enemySpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+          tileToCharacter _ = Nothing
 
 findPlayer :: World -> Character
 findPlayer = head . characters
@@ -51,11 +56,6 @@ addMoney w = w { money = money w + moneyMultiplier }
 updateCharacters :: Double -> World -> World
 updateCharacters dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
 
-tileToCharacter spriteSheet ((x, y), Player) = 
-        Just ((player spriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
-tileToCharacter spriteSheet ((x, y), Enemy) = 
-        Just ((enemy spriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
-tileToCharacter _ _ = Nothing
 
 anyCharacter spriteSheet = Character 
     { moveVelocity = 3
@@ -72,7 +72,10 @@ anyCharacter spriteSheet = Character
     , falling   = True
     , using     = False
     , attacking = False
+
     , jumping   = False
+    , canJump    = True
+    , timeToJump = 1.0
 
     , characterSpriteSheet = spriteSheet
     }

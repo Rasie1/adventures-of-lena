@@ -18,7 +18,7 @@ import qualified SDL
 
 import Data.Maybe
 import qualified Data.Map
-import Data.Text hiding (foldl')
+import Data.Text hiding (foldl', head)
 import Data.Foldable          
 import Control.Monad
 
@@ -47,9 +47,67 @@ main = withSDL $ withSDLImage $ do
       levelTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24 * outputScale
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
+      enemyTexture <- loadTextureWithInfo r "./assets/enemy.png"
       levelString <- readFile "./assets/level1.map"
       initialTime <- getTime Monotonic
 
+      let enemySprites = 
+                     [("RunRight", 
+                      SpriteInfo { framesCount  = 8
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 0)
+                                 , frameSize    = (48, 48)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
+                     ("RunLeft", 
+                      SpriteInfo { framesCount  = 8
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 48)
+                                 , frameSize    = (48, 48)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
+                     ("FallRight", 
+                      SpriteInfo { framesCount  = 8
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 0)
+                                 , frameSize    = (48, 48)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
+                     ("FallLeft", 
+                      SpriteInfo { framesCount  = 8
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 48)
+                                 , frameSize    = (48, 48)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 }),
+                     ("Stand", 
+                      SpriteInfo { framesCount  = 8
+                                 , currentFrame = 0
+                                 , frameCoords  = (0, 48)
+                                 , frameSize    = (48, 48)
+                                 , unitSize     = unitSize
+                                 , gapBetweenFrames  = 0
+                                 , frameChangeTime   = 0.2
+                                 , timeSinceChange   = 0
+                                 , reversedFrames    = False
+                                 })
+                     ]
 
       let sprites = [("RunRight", 
                       SpriteInfo { framesCount  = 4
@@ -87,7 +145,7 @@ main = withSDL $ withSDLImage $ do
                      ("FallLeft",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (569, 54)
+                                 , frameCoords  = (569, 60)
                                  , frameSize    = (45, 54)
                                  , unitSize     = unitSize
                                  , gapBetweenFrames  = 0
@@ -98,7 +156,7 @@ main = withSDL $ withSDLImage $ do
                      ("FallRight",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (48, 54)
+                                 , frameCoords  = (48, 60)
                                  , frameSize    = (45, 54)
                                  , unitSize     = unitSize
                                  , gapBetweenFrames  = 0
@@ -112,11 +170,16 @@ main = withSDL $ withSDLImage $ do
                                              , spriteSheetTexture  = characterTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
+      let enemySpriteSheet = SpriteSheet { sprites = Data.Map.fromList enemySprites
+                                         , currentSprite       = "RunLeft"
+                                         , spriteSheetTexture  = enemyTexture
+                                         , spriteSheetPosition = (0, 0)
+                                         }
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture backgroundTexture unitSize) characterSpriteSheet) initialTime
+      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture backgroundTexture unitSize) characterSpriteSheet enemySpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
-                                     then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state) ++ ", ₽" ++ (show . money . world) state
+                                     then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state) ++ ", ₽" ++ (show . money . world) state ++ ", ttj: " ++ (show . timeToJump . head . characters . world) state
                                              return state { framesSinceLastFPSPrint = 0
                                                           , lastFPSPrintTime = time }
                                      else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }

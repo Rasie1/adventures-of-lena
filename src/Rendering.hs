@@ -32,7 +32,7 @@ renderFrame screen renderer gameState = do
 
 withSDL :: (MonadIO m) => m a -> m ()
 withSDL op = do
-    SDL.initialize []
+    SDL.initialize [SDL.InitAudio]
     void op
     SDL.quit
 
