@@ -47,7 +47,7 @@ main = withSDL $ withSDLImage $ do
       levelTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24 * outputScale
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
-      levelString <- readFile "./assets/tiles.map"
+      levelString <- readFile "./assets/level1.map"
       initialTime <- getTime Monotonic
 
 

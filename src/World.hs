@@ -37,7 +37,7 @@ updatePickups w = let p = findPlayer w
                       t = tiles $ level w
                       toCoord (x, y) = (floor x, floor y)
                       pos = currentPosition p
-                      tile = t ! (toCoord pos) 
+                      tile = getTile t (toCoord pos) 
                    in case tile of 
                         Money -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         _     -> w

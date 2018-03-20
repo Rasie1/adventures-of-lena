@@ -82,6 +82,10 @@ data Tile = Sky
           | GroundBottomRight
           | GroundBottom1
           | GroundBottom2
+          | GroundGrassLeft
+          | GroundGrassRight
+          | GroundLeftBorder
+          | GroundRightBorder
           | Player 
           | Enemy 
           | Money 

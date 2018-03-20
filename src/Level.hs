@@ -35,6 +35,10 @@ instance Drawable Level where
           getTilesheetCoords GroundBottomRight = (144, 144)
           getTilesheetCoords GroundBottom1 = (48, 144)
           getTilesheetCoords GroundBottom2 = (96, 144)
+          getTilesheetCoords GroundGrassLeft = (240, 144)
+          getTilesheetCoords GroundGrassRight = (192, 144)
+          getTilesheetCoords GroundLeftBorder = (192, 192)
+          getTilesheetCoords GroundRightBorder = (240, 192)
           getTilesheetCoords Spikes1 = (1056, 0)
           getTilesheetCoords Spikes2 = (1056, 48)
 
@@ -84,6 +88,10 @@ loadLevel s t bt unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arr
 removeTile :: (Int, Int) -> Level -> Level
 removeTile pos lvl = lvl { tiles = tiles lvl // [(pos, Sky)] }
 
+getTile :: Array (Int, Int) Tile -> (Int, Int) -> Tile
+getTile a k = if inRange (bounds a) k then a ! k
+                                      else Sky
+
 toTile :: Char -> Tile
 toTile 'w' = GroundTop1
 toTile 'e' = GroundTop2
@@ -99,14 +107,18 @@ toTile 'z' = GroundBottomLeft
 toTile 'v' = GroundBottomRight
 toTile 'x' = GroundBottom1
 toTile 'c' = GroundBottom2
-toTile 'p' = Player
-toTile 'o' = Enemy
-toTile 'm' = Money
+toTile '0' = Player
+toTile '9' = Enemy
+toTile '`' = Money
 toTile '1' = RedDye
 toTile '2' = BlueDye
 toTile '3' = GreenDye
 toTile 'h' = Spikes1
 toTile 'n' = Spikes2
+toTile 'm' = GroundGrassLeft
+toTile '/' = GroundGrassRight
+toTile ',' = GroundLeftBorder
+toTile '.' = GroundRightBorder
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
@@ -124,4 +136,8 @@ isSolid GroundBottomLeft = True
 isSolid GroundBottomRight = True
 isSolid GroundBottom1 = True
 isSolid GroundBottom2 = True
+isSolid GroundGrassLeft = True
+isSolid GroundGrassRight = True
+isSolid GroundLeftBorder = True
+isSolid GroundRightBorder = True
 isSolid _ = False

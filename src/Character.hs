@@ -70,10 +70,10 @@ updateCollisions World { level = Level { tiles = t } }
           xr = x + r
           yt = y - r
           yb = y + r
-          hitsb = isSolid (t ! (toCoord x, toCoord yb))
-          hitst = isSolid (t ! (toCoord x, toCoord yt))
-          hitsl = isSolid (t ! (toCoord xl, toCoord y))
-          hitsr = isSolid (t ! (toCoord xr, toCoord y))
+          hitsb = isSolid (getTile t (toCoord x, toCoord yb))
+          hitst = isSolid (getTile t (toCoord x, toCoord yt))
+          hitsl = isSolid (getTile t (toCoord xl, toCoord y))
+          hitsr = isSolid (getTile t (toCoord xr, toCoord y))
           toCoord = floor
           flatten = fromIntegral . toCoord 
           newx = if hitsr then flatten xr - r
