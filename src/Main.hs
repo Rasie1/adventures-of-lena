@@ -41,16 +41,13 @@ main = withSDL $ withSDLImage $ do
   setHintQuality
   withWindow "Game" resolution $ \w ->
     withRenderer w $ \r -> do
-      let outputScale = 1.0
 
-      backgroundTexture <- loadTextureWithInfo r "./assets/sky.png"
-      levelTexture <- loadTextureWithInfo r "./assets/tiles2.png"
-      let unitSize = (fromIntegral $ SDL.textureWidth (snd levelTexture)) / 24 * outputScale
+      tilesTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
       enemyTexture <- loadTextureWithInfo r "./assets/enemy.png"
-      levelString <- readFile "./assets/level1.map"
       initialTime <- getTime Monotonic
 
+      let unitSize = (fromIntegral $ SDL.textureWidth (snd tilesTexture)) / 24
       let enemySprites = 
                      [("RunRight", 
                       SpriteInfo { framesCount  = 8
@@ -176,7 +173,9 @@ main = withSDL $ withSDLImage $ do
                                          , spriteSheetPosition = (0, 0)
                                          }
 
-      let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture backgroundTexture unitSize) characterSpriteSheet enemySpriteSheet) initialTime
+      currentLevel <- loadLevelByName r "level1" tilesTexture unitSize
+
+      let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ printDebugData state
@@ -196,8 +195,14 @@ main = withSDL $ withSDLImage $ do
 
       runApp update initialGameState
 
-      SDL.destroyTexture (fst levelTexture)
+      SDL.destroyTexture (fst tilesTexture)
 
+loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
+loadLevelByName r name tilesTexture unitSize = do
+      backgroundTexture <- loadTextureWithInfo r ("./assets/" ++ name ++ ".png")
+      let mapPath = "./assets/" ++ name ++ ".map" 
+      levelString <- readFile mapPath
+      return (loadLevel levelString tilesTexture backgroundTexture unitSize)
 
 printDebugData :: GameState -> String
 printDebugData state = 
