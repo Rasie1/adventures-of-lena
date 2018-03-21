@@ -173,7 +173,7 @@ main = withSDL $ withSDLImage $ do
                                          , spriteSheetPosition = (0, 0)
                                          }
 
-      currentLevel <- loadLevelByName r "level1" tilesTexture unitSize
+      currentLevel <- loadLevelByName r "level2" tilesTexture unitSize
 
       let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
