@@ -42,3 +42,12 @@ getRectPosition (SDL.Rectangle (SDL.P (SDL.V2 x y)) d) = (x, y)
 
 compose :: [a -> a] -> a -> a
 compose = foldl (flip (.)) id
+
+sqr :: Double -> Double
+sqr x = x * x
+
+distanceSqr :: (Double, Double) -> (Double, Double) -> Double
+distanceSqr (x0, y0) (x1, y1) = (sqr (x0 - x1) + sqr (y0 - y1))
+
+distance :: (Double, Double) -> (Double, Double) -> Double
+distance a b = sqrt (distanceSqr a b)

@@ -95,12 +95,14 @@ data Tile = Sky
           | RedDye 
           | BlueDye 
           | GreenDye 
+          | KillZone 
           deriving Show
 
 data World = World
   { level :: Level
   , characters :: [Character]
   , money  :: Int
+  , savedWorld :: Maybe World
   }
 
 data Camera = Camera 

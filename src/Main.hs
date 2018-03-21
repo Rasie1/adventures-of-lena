@@ -18,7 +18,7 @@ import qualified SDL
 
 import Data.Maybe
 import qualified Data.Map
-import Data.Text hiding (foldl', head)
+import qualified Data.Text
 import Data.Foldable          
 import Control.Monad
 
@@ -179,7 +179,7 @@ main = withSDL $ withSDLImage $ do
       let initialGameState = mkGameState (mkWorld (loadLevel levelString levelTexture backgroundTexture unitSize) characterSpriteSheet enemySpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
-                                     then do putStrLn $ "FPS: " ++ show (framesSinceLastFPSPrint state) ++ ", ₽" ++ (show . money . world) state ++ ", ttj: " ++ (show . timeToJump . head . characters . world) state
+                                     then do putStrLn $ printDebugData state
                                              return state { framesSinceLastFPSPrint = 0
                                                           , lastFPSPrintTime = time }
                                      else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }
@@ -197,6 +197,16 @@ main = withSDL $ withSDLImage $ do
       runApp update initialGameState
 
       SDL.destroyTexture (fst levelTexture)
+
+
+printDebugData :: GameState -> String
+printDebugData state = 
+    "FPS: " ++ show (framesSinceLastFPSPrint state) 
+    ++ ", ₽" ++ (show . money . world) state 
+    ++ ", ec: " ++ show collision
+            where (p:enemies) = characters . world $ state
+                  collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
+                  collision = or . map collides $ enemies
 
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()

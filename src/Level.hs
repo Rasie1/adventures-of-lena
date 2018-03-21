@@ -119,6 +119,7 @@ toTile 'm' = GroundGrassLeft
 toTile '/' = GroundGrassRight
 toTile ',' = GroundLeftBorder
 toTile '.' = GroundRightBorder
+toTile '<' = KillZone
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
@@ -141,3 +142,8 @@ isSolid GroundGrassRight = True
 isSolid GroundLeftBorder = True
 isSolid GroundRightBorder = True
 isSolid _ = False
+
+isDeadly :: Tile -> Bool
+isDeadly Spikes2  = True
+isDeadly KillZone = True
+isDeadly _ = False

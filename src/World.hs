@@ -15,15 +15,25 @@ instance Drawable World where
 
 
 updateWorld :: Double -> World -> World
-updateWorld dt = updatePickups
+updateWorld dt = processPlayerDeath
+               . processTiles
                . updateCharacters dt
 
 mkWorld :: Level -> SpriteSheet -> SpriteSheet -> World
-mkWorld lvl characterSpriteSheet enemySpriteSheet = World 
+mkWorld lvl characterSpriteSheet enemySpriteSheet = saveWorld World 
     { level = lvl
     , characters = spawnCharacters lvl characterSpriteSheet enemySpriteSheet
     , money = 0
+    , savedWorld = Nothing
     }
+
+saveWorld :: World -> World
+saveWorld w = w { savedWorld = Just w }
+
+loadWorld :: World -> World
+loadWorld w = case savedWorld w of
+                    Just save -> saveWorld save
+                    Nothing   -> w
 
 spawnCharacters :: Level -> SpriteSheet -> SpriteSheet -> [Character]
 spawnCharacters lvl characterSpriteSheet enemySpriteSheet = 
@@ -37,14 +47,22 @@ spawnCharacters lvl characterSpriteSheet enemySpriteSheet =
 findPlayer :: World -> Character
 findPlayer = head . characters
 
-updatePickups :: World -> World
-updatePickups w = let p = findPlayer w
+processPlayerDeath :: World -> World
+processPlayerDeath w = let (p:enemies) = characters w
+                           collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
+                        in if or . map collides $ enemies then loadWorld w
+                                                          else w
+
+
+processTiles :: World -> World
+processTiles w =  let p = findPlayer w
                       t = tiles $ level w
                       toCoord (x, y) = (floor x, floor y)
                       pos = currentPosition p
                       tile = getTile t (toCoord pos) 
-                   in case tile of 
-                        Money -> addMoney w { level = removeTile (toCoord pos) (level w) }
+                   in case (tile, isDeadly tile) of 
+                        (_, True) -> loadWorld w
+                        (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         _     -> w
 
 moneyMultiplier :: Int
