@@ -96,6 +96,10 @@ data Tile = Sky
           | BlueDye 
           | GreenDye 
           | KillZone 
+          | BushShort
+          | Bush1
+          | Bush2
+          | Bush3
           deriving Show
 
 data World = World

@@ -41,6 +41,10 @@ instance Drawable Level where
           getTilesheetCoords GroundRightBorder = (240, 192)
           getTilesheetCoords Spikes1 = (1056, 0)
           getTilesheetCoords Spikes2 = (1056, 48)
+          getTilesheetCoords BushShort = (0, 432)
+          getTilesheetCoords Bush1 = (48, 432)
+          getTilesheetCoords Bush2 = (96, 432)
+          getTilesheetCoords Bush3 = (144, 432)
 
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
@@ -120,6 +124,10 @@ toTile '/' = GroundGrassRight
 toTile ',' = GroundLeftBorder
 toTile '.' = GroundRightBorder
 toTile '<' = KillZone
+toTile '!' = BushShort
+toTile '@' = Bush1
+toTile '#' = Bush2
+toTile '$' = Bush3
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
