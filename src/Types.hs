@@ -100,6 +100,14 @@ data Tile = Sky
           | Bush1
           | Bush2
           | Bush3
+          | Menu
+          | Level1
+          | Level2
+          | Level3
+          | Level4
+          | Level5
+          | Level6
+          | Level7
           deriving Show
 
 data World = World
@@ -107,6 +115,7 @@ data World = World
   , characters :: [Character]
   , money  :: Int
   , savedWorld :: Maybe World
+  , wantToChangeLevel :: Maybe String
   }
 
 data Camera = Camera 

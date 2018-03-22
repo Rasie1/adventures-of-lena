@@ -2,8 +2,13 @@ resolver: lts-9.6
 packages:
   - .
 
-extra-deps: [sdl2-mixer-1.1.0]
+extra-deps:
+- sdl2-mixer-1.1.0
+- sdl2-2.4.0.1
 
 flags: {}
 
 extra-package-dbs: []
+
+ghc-options:
+    hs-game: "-threaded -O2 -rtsopts -with-rtsopts=-N -Wall -lSDL2_image -lSDL2_mixer"

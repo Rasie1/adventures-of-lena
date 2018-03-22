@@ -25,6 +25,7 @@ mkWorld lvl characterSpriteSheet enemySpriteSheet = saveWorld World
     , characters = spawnCharacters lvl characterSpriteSheet enemySpriteSheet
     , money = 0
     , savedWorld = Nothing
+    , wantToChangeLevel = Nothing
     }
 
 saveWorld :: World -> World
@@ -62,6 +63,14 @@ processTiles w =  let p = findPlayer w
                       tile = getTile t (toCoord pos) 
                    in case (tile, isDeadly tile) of 
                         (_, True) -> loadWorld w
+                        (Level1, _) -> w { wantToChangeLevel = Just "level1" }
+                        (Level2, _) -> w { wantToChangeLevel = Just "level2" }
+                        (Level3, _) -> w { wantToChangeLevel = Just "level3" }
+                        (Level4, _) -> w { wantToChangeLevel = Just "level4" }
+                        (Level5, _) -> w { wantToChangeLevel = Just "level5" }
+                        (Level6, _) -> w { wantToChangeLevel = Just "level6" }
+                        (Level7, _) -> w { wantToChangeLevel = Just "level7" }
+                        (Menu, _) -> w { wantToChangeLevel = Just "menu" }
                         (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         _     -> w
 

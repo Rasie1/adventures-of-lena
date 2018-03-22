@@ -45,6 +45,14 @@ instance Drawable Level where
           getTilesheetCoords Bush1 = (48, 432)
           getTilesheetCoords Bush2 = (96, 432)
           getTilesheetCoords Bush3 = (144, 432)
+          getTilesheetCoords Menu = (150, 600)
+          getTilesheetCoords Level1 = (150, 600)
+          getTilesheetCoords Level2 = (150, 600)
+          getTilesheetCoords Level3 = (150, 600)
+          getTilesheetCoords Level4 = (150, 600)
+          getTilesheetCoords Level5 = (150, 600)
+          getTilesheetCoords Level6 = (150, 600)
+          getTilesheetCoords Level7 = (150, 600)
 
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
@@ -128,6 +136,14 @@ toTile '!' = BushShort
 toTile '@' = Bush1
 toTile '#' = Bush2
 toTile '$' = Bush3
+toTile 'й'  = Menu
+toTile 'ц'  = Level1
+toTile 'у'  = Level2
+toTile 'к'  = Level3
+toTile 'е'  = Level4
+toTile 'н'  = Level5
+toTile 'г'  = Level6
+toTile 'ш'  = Level7
 toTile _ = Sky
 
 isSolid :: Tile -> Bool

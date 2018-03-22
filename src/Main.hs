@@ -13,15 +13,14 @@ import Actor
 import Character
 import Rendering
 import SpriteSheet
+import Audio
 
 import qualified SDL
-
 import Data.Maybe
 import qualified Data.Map
 import qualified Data.Text
 import Data.Foldable          
 import Control.Monad
-
 import System.Clock
 
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
@@ -39,8 +38,11 @@ resolutionDouble = (fromIntegral screenx, fromIntegral screeny)
 main :: IO ()
 main = withSDL $ withSDLImage $ do
   setHintQuality
-  withWindow "Game" resolution $ \w ->
+  withWindow "Game" resolution $ \w -> do
     withRenderer w $ \r -> do
+      initAudio
+      music <- loadMusic "./assets/level1.ogg"
+      playMusic music
 
       tilesTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
@@ -173,7 +175,7 @@ main = withSDL $ withSDLImage $ do
                                          , spriteSheetPosition = (0, 0)
                                          }
 
-      currentLevel <- loadLevelByName r "level2" tilesTexture unitSize
+      currentLevel <- loadLevelByName r "menu" tilesTexture unitSize
 
       let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime
       let updateTime time state = return state { currentTime = time }
@@ -190,12 +192,22 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
+                            >>= processLevelTransition r tilesTexture characterSpriteSheet enemySpriteSheet unitSize
                             >>= renderFrame resolutionDouble r 
                               . updateCamera
 
       runApp update initialGameState
 
       SDL.destroyTexture (fst tilesTexture)
+
+processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
+                  -> SpriteSheet -> SpriteSheet -> Double
+                   -> GameState -> IO GameState
+processLevelTransition r tex characterTex enemyTex s state = 
+    case wantToChangeLevel . world $ state of
+        Just name -> do nextLevel <- loadLevelByName r name tex s
+                        return state { world = mkWorld nextLevel characterTex enemyTex }
+        Nothing   -> return state
 
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
 loadLevelByName r name tilesTexture unitSize = do
@@ -224,6 +236,7 @@ repeatUntil f p = go
 updateGame :: DeltaTime -> GameState -> IO GameState
 updateGame dt state = return state { world = updateWorld dt $ world state }
 
+
 applyIntentToGameState :: Intent -> GameState -> GameState
 applyIntentToGameState i s@GameState { world = w@World { characters = (player:xs) } } = 
         s { world = w { characters = (applyIntent i player):xs } }
@@ -233,3 +246,8 @@ applyIntentToGameState _ s    = s
 handleInput :: GameState -> [SDL.Event] -> GameState
 handleInput w
   = foldl' (flip applyIntentToGameState) w . fmap (payloadToIntent . SDL.eventPayload)
+
+
+
+
+

@@ -17,6 +17,7 @@ executable game
                        Drawable
                        Camera
                        Actor
+                       Audio
                        Character
                        Rendering
                        Types
