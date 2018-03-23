@@ -3,8 +3,8 @@ module Types where
 import Data.Array
 import System.Clock
 import qualified SDL
-import Data.Map
 import Data.Text
+import qualified Data.HashMap.Strict as Map
 
 type ScreenSize = (Double, Double)
 type Position = (Double, Double)
@@ -110,6 +110,8 @@ data Tile = Sky
           | Level7
           deriving Show
 
+type DigitsTextures = Map.HashMap Char (SDL.Texture, SDL.TextureInfo)
+
 data World = World
   { level :: Level
   , characters :: [Character]
@@ -136,6 +138,7 @@ data GameState = GameState
   , camera :: Camera
 
   , shutdown :: Bool
+  , digitsTextures :: DigitsTextures
   }
 
 data SpriteInfo = SpriteInfo 
@@ -151,7 +154,7 @@ data SpriteInfo = SpriteInfo
   }
 
 data SpriteSheet = SpriteSheet 
-  { sprites :: Map Text SpriteInfo
+  { sprites :: Map.HashMap Text SpriteInfo
   , currentSprite :: Text
   , spriteSheetTexture :: (SDL.Texture, SDL.TextureInfo)
   , spriteSheetPosition :: Position

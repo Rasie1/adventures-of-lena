@@ -6,8 +6,8 @@ import Common
 import Types
 import System.Clock
 
-mkGameState :: World -> TimeSpec -> GameState
-mkGameState w time = GameState
+mkGameState :: World -> TimeSpec -> DigitsTextures -> GameState
+mkGameState w time dtex = GameState
   { world = w
   , currentTime = time
 
@@ -22,4 +22,5 @@ mkGameState w time = GameState
   , framesSinceLastFPSPrint = 0
   , lastFPSPrintTime = time
   , shutdown = False
+  , digitsTextures = dtex
   }

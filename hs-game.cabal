@@ -21,18 +21,21 @@ executable game
                        Character
                        Rendering
                        Types
+                       Counter
                        Bot
                        SpriteSheet
   build-depends:       base
                      , sdl2
                      , sdl2-image
                      , sdl2-mixer
+                     , unordered-containers
                      , template-haskell
                      , monad-loops
                      , text
                      , vector
                      , array
                      , lens
+                     , linear
                      , containers
                      , clock
                      , formatting

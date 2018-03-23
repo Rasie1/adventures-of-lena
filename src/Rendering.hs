@@ -9,7 +9,6 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.Text              (Text)
 import Data.Maybe
 import Data.Foldable          
-
 import SDL (($=))
 import Common
 
@@ -19,6 +18,7 @@ import Types
 import GameState
 import Drawable
 import SpriteSheet
+import Counter
 
 renderFrame :: ScreenSize -> SDL.Renderer -> GameState -> IO (GameState)
 renderFrame screen renderer gameState = do
@@ -27,6 +27,7 @@ renderFrame screen renderer gameState = do
           (camera gameState)
            renderer 
           (world gameState)
+    renderScore renderer (digitsTextures gameState) (money . world $ gameState)
     SDL.present renderer
     return gameState
 

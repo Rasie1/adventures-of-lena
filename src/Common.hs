@@ -1,6 +1,7 @@
 module Common where
 
 import qualified SDL
+import           Foreign.C.Types
 
 
 isContinue :: Maybe SDL.Event -> Bool
@@ -15,7 +16,6 @@ conditionallyRun _ False = pure False
 isQuitEvent :: SDL.Event -> Bool
 isQuitEvent (SDL.Event _t SDL.QuitEvent) = True
 isQuitEvent _ = False
-
 
 
 mkPoint :: a -> a -> SDL.Point SDL.V2 a
@@ -51,3 +51,6 @@ distanceSqr (x0, y0) (x1, y1) = (sqr (x0 - x1) + sqr (y0 - y1))
 
 distance :: (Double, Double) -> (Double, Double) -> Double
 distance a b = sqrt (distanceSqr a b)
+
+getTextureSize :: SDL.TextureInfo -> SDL.V2 CInt
+getTextureSize ti = SDL.V2 (SDL.textureWidth ti)  (SDL.textureHeight ti)

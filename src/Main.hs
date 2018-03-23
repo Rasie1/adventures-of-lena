@@ -17,11 +17,11 @@ import Audio
 
 import qualified SDL
 import Data.Maybe
-import qualified Data.Map
 import qualified Data.Text
 import Data.Foldable          
 import Control.Monad
 import System.Clock
+import qualified Data.HashMap.Strict as Map
 
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
@@ -47,6 +47,7 @@ main = withSDL $ withSDLImage $ do
       tilesTexture <- loadTextureWithInfo r "./assets/tiles2.png"
       characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
       enemyTexture <- loadTextureWithInfo r "./assets/enemy.png"
+      digitsTexture <- loadDigitsTextures r
       initialTime <- getTime Monotonic
 
       let unitSize = (fromIntegral $ SDL.textureWidth (snd tilesTexture)) / 24
@@ -164,12 +165,12 @@ main = withSDL $ withSDLImage $ do
                                  , reversedFrames    = True
                                  })
                     ]
-      let characterSpriteSheet = SpriteSheet { sprites = Data.Map.fromList sprites
+      let characterSpriteSheet = SpriteSheet { sprites = Map.fromList sprites
                                              , currentSprite       = "RunLeft"
                                              , spriteSheetTexture  = characterTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
-      let enemySpriteSheet = SpriteSheet { sprites = Data.Map.fromList enemySprites
+      let enemySpriteSheet = SpriteSheet { sprites = Map.fromList enemySprites
                                          , currentSprite       = "RunLeft"
                                          , spriteSheetTexture  = enemyTexture
                                          , spriteSheetPosition = (0, 0)
@@ -177,7 +178,7 @@ main = withSDL $ withSDLImage $ do
 
       currentLevel <- loadLevelByName r "menu" tilesTexture unitSize
 
-      let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime
+      let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime digitsTexture
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ printDebugData state
@@ -219,11 +220,11 @@ loadLevelByName r name tilesTexture unitSize = do
 printDebugData :: GameState -> String
 printDebugData state = 
     "FPS: " ++ show (framesSinceLastFPSPrint state) 
-    ++ ", ₽" ++ (show . money . world) state 
-    ++ ", ec: " ++ show collision
-            where (p:enemies) = characters . world $ state
-                  collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
-                  collision = or . map collides $ enemies
+    -- ++ ", ₽" ++ (show . money . world) state 
+    -- ++ ", ec: " ++ show collision
+    --         where (p:enemies) = characters . world $ state
+    --               collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
+    --               collision = or . map collides $ enemies
 
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()
@@ -248,6 +249,16 @@ handleInput w
   = foldl' (flip applyIntentToGameState) w . fmap (payloadToIntent . SDL.eventPayload)
 
 
-
-
-
+loadDigitsTextures :: SDL.Renderer -> IO DigitsTextures
+loadDigitsTextures r = mapM (loadTextureWithInfo r) $
+  Map.fromList [ ('0', "assets/font_big_0.png")
+             , ('1', "assets/font_big_1.png")
+             , ('2', "assets/font_big_2.png")
+             , ('3', "assets/font_big_3.png")
+             , ('4', "assets/font_big_4.png")
+             , ('5', "assets/font_big_5.png")
+             , ('6', "assets/font_big_6.png")
+             , ('7', "assets/font_big_7.png")
+             , ('8', "assets/font_big_8.png")
+             , ('9', "assets/font_big_9.png")
+             ]

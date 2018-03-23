@@ -5,8 +5,8 @@ import qualified SDL
 import Types
 import Camera
 import Drawable
-import Data.Map
 import Data.Text
+import Data.HashMap.Strict
 -- import Control.Lens
 
 -- makeLenses ''SpriteSheet
