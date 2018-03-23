@@ -15,6 +15,7 @@ data Character = Character
     { moveVelocity :: Double
     , radius       :: Double
     , inertia      :: Double
+    , airInertia   :: Double
     , jumpPower   :: Double
 
     , currentPosition :: Position
@@ -114,7 +115,8 @@ type DigitsTextures = Map.HashMap Char (SDL.Texture, SDL.TextureInfo)
 
 data World = World
   { level :: Level
-  , characters :: [Character]
+  , enemyCharacters :: [Character]
+  , playerCharacter :: Character
   , money  :: Int
   , savedWorld :: Maybe World
   , wantToChangeLevel :: Maybe String

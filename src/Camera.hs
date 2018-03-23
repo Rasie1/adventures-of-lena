@@ -16,16 +16,11 @@ updateCamera s@GameState { camera = cam@Camera
                      , oldCameraEdge = newEdge
                      , oldPivot = playerPosition } }
     where playerPosition = pointPlus pivotOffset
-                         . fromMaybe (0, 0)
-                         . fmap currentPosition 
-                         . find isPlayer 
-                         . characters 
+                         . currentPosition 
+                         . playerCharacter 
                          . world $ s
           newx = fst playerPosition
           newy = snd playerPosition
-
-          isPlayer Character {} = True
-          isPlayer _            = False
 
           xLengthExceed = abs (newx - edgex) > lengthx
           yLengthExceed = abs (newy - edgey) > lengthy

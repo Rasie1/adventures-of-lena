@@ -37,16 +37,17 @@ jump c@Character { jumping = True
                                          , currentVelocity = (dx, dy - jy * 10) }
 jump c = c
 
-move :: Character -> Character
-move c@Character { moving = MovingLeft
-                 , currentVelocity = (dx, dy)
-                 , moveVelocity = m } = c { currentVelocity = (-m, dy)}
-move c@Character { moving = MovingRight 
-                 , currentVelocity = (dx, dy)
-                 , moveVelocity = m } = c { currentVelocity = (m, dy)}
-move c@Character { moving = NotMoving 
-                 , currentVelocity = (dx, dy)
-                 , moveVelocity = m } = c { currentVelocity = (0, dy)}
+move :: DeltaTime -> Character -> Character
+move dt c@Character  { moving = moving 
+                     , currentVelocity = (dx, dy)
+                     , inertia = i
+                     , falling = falling
+                     , airInertia = ai
+                     , moveVelocity = m } = 
+    case moving of
+                MovingLeft  -> c { currentVelocity = (-m, dy) }
+                MovingRight -> c { currentVelocity = ( m, dy) }
+                NotMoving   -> c { currentVelocity = (dx * if falling then ai else i, dy) }
 
 
 updatePosition :: DeltaTime -> Character -> Character
@@ -123,7 +124,7 @@ updateGraphics dt c@Character { moveVelocity = maxVel
                               , characterSpriteSheet = s } = 
     c { characterSpriteSheet = 
             let updated = updateSpriteSheet dt (updateState newState s)
-                newState = case (signum vx, isFalling) of 
+                newState = case (signum (round vx), isFalling) of 
                                 (1,  False) -> "RunRight"
                                 (0,  False) -> "Stand"
                                 (-1, False) -> "RunLeft" 
@@ -141,7 +142,7 @@ updateCharacter dt world ch = Just
                            -- . activate world
                            -- . attack world
                            . jump 
-                           . move 
+                           . move dt
                            . applyBot BotMemory world 
                                       $ ch
 

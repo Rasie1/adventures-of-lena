@@ -7,11 +7,12 @@ import Data.Maybe
 import Character
 import Types
 import Data.Array
+import Data.List
 import Bot
 
 instance Drawable World where
     render s c r world = do render s c r (level world)
-                            mapM_ (render s c r) (characters world)
+                            mapM_ (render s c r) (playerCharacter world : enemyCharacters world)
 
 
 updateWorld :: Double -> World -> World
@@ -20,13 +21,22 @@ updateWorld dt = processPlayerDeath
                . updateCharacters dt
 
 mkWorld :: Level -> SpriteSheet -> SpriteSheet -> World
-mkWorld lvl characterSpriteSheet enemySpriteSheet = saveWorld World 
+mkWorld lvl playerSpriteSheet enemySpriteSheet = saveWorld World 
     { level = lvl
-    , characters = spawnCharacters lvl characterSpriteSheet enemySpriteSheet
+    , enemyCharacters = spawnEnemies
+    , playerCharacter = spawnPlayer
     , money = 0
     , savedWorld = Nothing
     , wantToChangeLevel = Nothing
     }
+    where tileToEnemy ((x, y), Enemy) = 
+                Just ((enemy enemySpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+          tileToEnemy _ = Nothing
+          tileToPlayer ((x, y), Player) = 
+                Just ((player playerSpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+          tileToPlayer _ = Nothing
+          spawnEnemies = mapMaybe tileToEnemy (assocs (tiles lvl))
+          spawnPlayer = head $ mapMaybe tileToPlayer (assocs (tiles lvl))
 
 saveWorld :: World -> World
 saveWorld w = w { savedWorld = Just w }
@@ -36,27 +46,16 @@ loadWorld w = case savedWorld w of
                     Just save -> saveWorld save
                     Nothing   -> w
 
-spawnCharacters :: Level -> SpriteSheet -> SpriteSheet -> [Character]
-spawnCharacters lvl characterSpriteSheet enemySpriteSheet = 
-    mapMaybe tileToCharacter (assocs (tiles lvl))
-    where tileToCharacter ((x, y), Player) = 
-                Just ((player characterSpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
-          tileToCharacter ((x, y), Enemy) = 
-                Just ((enemy enemySpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
-          tileToCharacter _ = Nothing
-
-findPlayer :: World -> Character
-findPlayer = head . characters
-
 processPlayerDeath :: World -> World
-processPlayerDeath w = let (p:enemies) = characters w
-                           collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
+processPlayerDeath w = let enemies = enemyCharacters w
+                           p       = playerCharacter w
+                           collides e = distance (currentPosition p) (currentPosition e) < (radius p{- + radius e-})
                         in if or . map collides $ enemies then loadWorld w
                                                           else w
 
 
 processTiles :: World -> World
-processTiles w =  let p = findPlayer w
+processTiles w =  let p = playerCharacter w
                       t = tiles $ level w
                       toCoord (x, y) = (floor x, floor y)
                       pos = currentPosition p
@@ -81,13 +80,15 @@ addMoney :: World -> World
 addMoney w = w { money = money w + moneyMultiplier }
 
 updateCharacters :: Double -> World -> World
-updateCharacters dt w = w { characters = mapMaybe (updateCharacter dt w) (characters w) }
+updateCharacters dt w = w { enemyCharacters = mapMaybe (updateCharacter dt w) (enemyCharacters w)
+                          , playerCharacter = fromJust $ updateCharacter dt w (playerCharacter w) }
 
 
 anyCharacter spriteSheet = Character 
     { moveVelocity = 3
     , radius       = 0.5
-    , inertia      = 0.1
+    , inertia      = 0.75
+    , airInertia   = 0.99
     , jumpPower    = 1
 
     , currentPosition = (0, 0)

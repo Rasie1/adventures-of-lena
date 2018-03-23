@@ -16,9 +16,9 @@ instance Drawable Level where
         where
           (texture, ti) = levelTexture lvl
           (btexture, bti) = backgroundTexture lvl
+          tileWidth :: Double
           tileWidth = (fromIntegral $ SDL.textureWidth ti) / 24
           unitSize = levelUnitSize lvl
-          tileRect = mkRect 0 0 tileWidth tileWidth
 
           getTilesheetCoords :: (Num a) => Tile -> (a, a)
           getTilesheetCoords GroundThin1 = (0, 288)
@@ -45,17 +45,23 @@ instance Drawable Level where
           getTilesheetCoords Bush1 = (48, 432)
           getTilesheetCoords Bush2 = (96, 432)
           getTilesheetCoords Bush3 = (144, 432)
-          getTilesheetCoords Menu = (150, 600)
-          getTilesheetCoords Level1 = (150, 600)
-          getTilesheetCoords Level2 = (150, 600)
-          getTilesheetCoords Level3 = (150, 600)
-          getTilesheetCoords Level4 = (150, 600)
-          getTilesheetCoords Level5 = (150, 600)
-          getTilesheetCoords Level6 = (150, 600)
-          getTilesheetCoords Level7 = (150, 600)
-
+          getTilesheetCoords Menu = (110, 550)
+          getTilesheetCoords Level1 = (110, 550)
+          getTilesheetCoords Level2 = (110, 550)
+          getTilesheetCoords Level3 = (110, 550)
+          getTilesheetCoords Level4 = (110, 550)
+          getTilesheetCoords Level5 = (110, 550)
+          getTilesheetCoords Level6 = (110, 550)
+          getTilesheetCoords Level7 = (110, 550)
           getTilesheetCoords Money = (960, 96)
           getTilesheetCoords _ = (432, 624)
+
+          getTileSize :: (Num a) => Tile -> (a, a)
+          getTileSize Level1 = (120, 150)
+          getTileSize _ = (48, 48)
+          getTileOffset :: (Num a) => Tile -> (a, a)
+          getTileOffset Level1 = (-60, -75)
+          getTileOffset _ = (0, 0)
 
           renderBackground = SDL.copy renderer 
                                       btexture 
@@ -66,8 +72,8 @@ instance Drawable Level where
           renderTile x y t
             = if shouldCull then return ()
                             else SDL.copy renderer texture src dst
-              where src = Just $ floor <$> moveTo (getTilesheetCoords t) tileRect
-                    dst = Just $ floor <$> dstRect
+              where src = Just $ floor <$> tileRect
+                    dst = Just $ floor <$> moveBy (getTileOffset t) dstRect
                     dstRect = applyCamera screen unitSize camera (moveTo dstCoords tileRect)
                     dstCoordX = fromIntegral x * unitSize
                     dstCoordY = fromIntegral y * unitSize
@@ -76,6 +82,9 @@ instance Drawable Level where
                     dstPosY = snd $ getRectPosition dstRect
                     shouldCull = dstPosX + unitSize < 0 || dstPosX > fst screen
                               || dstPosY + unitSize < 0 || dstPosY > snd screen
+                    (tileX, tileY) = getTilesheetCoords t
+                    (width, height) = getTileSize t
+                    tileRect = mkRect tileX tileY width height
 
 
 loadLevel :: String -> (SDL.Texture, SDL.TextureInfo) -> (SDL.Texture, SDL.TextureInfo) -> Double -> Level
@@ -136,14 +145,14 @@ toTile '!' = BushShort
 toTile '@' = Bush1
 toTile '#' = Bush2
 toTile '$' = Bush3
-toTile 'й'  = Menu
-toTile 'ц'  = Level1
-toTile 'у'  = Level2
-toTile 'к'  = Level3
-toTile 'е'  = Level4
-toTile 'н'  = Level5
-toTile 'г'  = Level6
-toTile 'ш'  = Level7
+toTile 'й' = Menu
+toTile 'ц' = Level1
+toTile 'у' = Level2
+toTile 'к' = Level3
+toTile 'е' = Level4
+toTile 'н' = Level5
+toTile 'г' = Level6
+toTile 'ш' = Level7
 toTile _ = Sky
 
 isSolid :: Tile -> Bool

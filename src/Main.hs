@@ -22,6 +22,7 @@ import Data.Foldable
 import Control.Monad
 import System.Clock
 import qualified Data.HashMap.Strict as Map
+import Data.HashMap.Strict ((!))
 
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
@@ -41,12 +42,12 @@ main = withSDL $ withSDLImage $ do
   withWindow "Game" resolution $ \w -> do
     withRenderer w $ \r -> do
       initAudio
-      music <- loadMusic "./assets/level1.ogg"
+      music <- loadMusic (obfuscatedStrings ! "farewell_mona_lisa.ogg")
       playMusic music
 
-      tilesTexture <- loadTextureWithInfo r "./assets/tiles2.png"
-      characterTexture <- loadTextureWithInfo r "./assets/lena_brown.png"
-      enemyTexture <- loadTextureWithInfo r "./assets/enemy.png"
+      tilesTexture <- loadTextureWithInfo r (obfuscatedStrings ! "tiles.png")
+      characterTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_brown.png")
+      enemyTexture <- loadTextureWithInfo r (obfuscatedStrings ! "enemy.png")
       digitsTexture <- loadDigitsTextures r
       initialTime <- getTime Monotonic
 
@@ -208,28 +209,28 @@ processLevelTransition r tex characterTex enemyTex s state =
     case wantToChangeLevel . world $ state of
         Just name -> do nextLevel <- loadLevelByName r name tex s
                         if name /= "level1" && name /= "menu"
-                            then do music <- loadMusic ("./assets/" ++ dname ++ ".ogg")
+                            then do music <- loadMusic (levelsMusic ! name)
                                     playMusic music
                             else return ()
-                        return state { world = mkWorld nextLevel characterTex enemyTex }
+                        return state { world = mkWorld nextLevel characterTex enemyTex
+                                     , camera = Camera { cameraPosition = (0, 0)
+                                                       , oldCameraEdge  = (0, 0)
+                                                       , armLength      = (0, 4)
+                                                       , oldPivot       = (0, 0)
+                                                       , pivotOffset    = (0, -2)
+                                                       } }
         Nothing   -> return state
 
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
 loadLevelByName r name tilesTexture unitSize = do
-      backgroundTexture <- loadTextureWithInfo r ("./assets/" ++ name ++ ".png")
-      let mapPath = "./assets/" ++ name ++ ".map" 
+      backgroundTexture <- loadTextureWithInfo r (obfuscatedStrings ! (name ++ ".png"))
+      let mapPath = (obfuscatedStrings ! (name ++ ".map")) 
       levelString <- readFile mapPath
       return (loadLevel levelString tilesTexture backgroundTexture unitSize)
 
 printDebugData :: GameState -> String
 printDebugData state = 
     "FPS: " ++ show (framesSinceLastFPSPrint state) 
-    -- ++ ", ₽" ++ (show . money . world) state 
-    -- ++ ", ec: " ++ show collision
-    --         where (p:enemies) = characters . world $ state
-    --               collides e = distance (currentPosition p) (currentPosition e) < (radius p + radius e)
-    --               collision = or . map collides $ enemies
-
 
 runApp :: (Monad m) => (GameState -> m GameState) -> GameState -> m ()
 runApp update = repeatUntil update shutdown
@@ -241,12 +242,9 @@ repeatUntil f p = go
 updateGame :: DeltaTime -> GameState -> IO GameState
 updateGame dt state = return state { world = updateWorld dt $ world state }
 
-
 applyIntentToGameState :: Intent -> GameState -> GameState
-applyIntentToGameState i s@GameState { world = w@World { characters = (player:xs) } } = 
-        s { world = w { characters = (applyIntent i player):xs } }
-applyIntentToGameState Quit s = s
-applyIntentToGameState _ s    = s
+applyIntentToGameState i state = 
+    state { world = (world state) { playerCharacter = applyIntent i . playerCharacter . world $ state } }
 
 handleInput :: GameState -> [SDL.Event] -> GameState
 handleInput w
@@ -255,14 +253,66 @@ handleInput w
 
 loadDigitsTextures :: SDL.Renderer -> IO DigitsTextures
 loadDigitsTextures r = mapM (loadTextureWithInfo r) $
-  Map.fromList [ ('0', "assets/font_big_0.png")
-               , ('1', "assets/font_big_1.png")
-               , ('2', "assets/font_big_2.png")
-               , ('3', "assets/font_big_3.png")
-               , ('4', "assets/font_big_4.png")
-               , ('5', "assets/font_big_5.png")
-               , ('6', "assets/font_big_6.png")
-               , ('7', "assets/font_big_7.png")
-               , ('8', "assets/font_big_8.png")
-               , ('9', "assets/font_big_9.png")
+  Map.fromList [ ('0', obfuscatedStrings ! "font_big_0.png")
+               , ('1', obfuscatedStrings ! "font_big_1.png")
+               , ('2', obfuscatedStrings ! "font_big_2.png")
+               , ('3', obfuscatedStrings ! "font_big_3.png")
+               , ('4', obfuscatedStrings ! "font_big_4.png")
+               , ('5', obfuscatedStrings ! "font_big_5.png")
+               , ('6', obfuscatedStrings ! "font_big_6.png")
+               , ('7', obfuscatedStrings ! "font_big_7.png")
+               , ('8', obfuscatedStrings ! "font_big_8.png")
+               , ('9', obfuscatedStrings ! "font_big_9.png")
                ]
+
+levelsMusic :: Map.HashMap String String
+levelsMusic = Map.fromList [ ("level1", obfuscatedStrings ! "farewell_mona_lisa.ogg"),
+                             ("level2", obfuscatedStrings ! "43burnt.ogg"),
+                             ("level3", obfuscatedStrings ! "black_bubblegum.ogg"),
+                             ("level4", obfuscatedStrings ! "43burnt.ogg"),
+                             ("level5", obfuscatedStrings ! "panasonic_youth.ogg"),
+                             ("level6", obfuscatedStrings ! "panasonic_youth.ogg"),
+                             ("level7", obfuscatedStrings ! "farewell_mona_lisa.ogg")
+                            ]
+
+obfuscatedStrings :: Map.HashMap String String
+obfuscatedStrings = Map.fromList [ ("level1.png",             "assets/data.bin.5"),
+                                   ("level1.map",             "assets/data.bin.7"),
+                                   ("level2.map",             "assets/data.bin.6"),
+                                   ("level2.png",             "assets/data.bin.8"),
+                                   ("level3.map",             "assets/data.bin.9"),
+                                   ("level3.png",             "assets/data.bin.27"),
+                                   ("level4.map",             "assets/data.bin.26"),
+                                   ("level4.png",             "assets/data.bin.17"),
+                                   ("level5.map",             "assets/data.bin.18"),
+                                   ("level5.png",             "assets/data.bin.15"),
+                                   ("level6.map",             "assets/data.bin.25"),
+                                   ("level6.png",             "assets/data.bin.31"),
+                                   ("level7.map",             "assets/data.bin.12"),
+                                   ("level7.png",             "assets/data.bin.24"),
+                                   ("menu.map",               "assets/data.bin.32"),
+                                   ("menu.png",               "assets/data.bin.2"),
+                                   ("farewell_mona_lisa.ogg", "assets/data.bin.0"),
+                                   ("43burnt.ogg",            "assets/data.bin.4"),
+                                   ("black_bubblegum.ogg",    "assets/data.bin.3"),
+                                   ("lena_brown.png",         "assets/data.bin.23"),
+                                   ("lena_red.png",           "assets/data.bin.30"),
+                                   ("lena_green.png",         "assets/data.bin.14"),
+                                   ("lena_blue.png",          "assets/data.bin.1"),
+                                   ("tiles.png",              "assets/data.bin.35"),
+                                   ("enemy.png",              "assets/data.bin.11"),
+                                   ("save.bin",               "assets/data.bin.33"),
+                                   ("font_big_0.png",         "assets/data.bin.16"),
+                                   ("font_big_1.png",         "assets/data.bin.19"),
+                                   ("font_big_2.png",         "assets/data.bin.28"),
+                                   ("font_big_3.png",         "assets/data.bin.10"),
+                                   ("font_big_4.png",         "assets/data.bin.22"),
+                                   ("font_big_5.png",         "assets/data.bin.29"),
+                                   ("font_big_6.png",         "assets/data.bin.13"),
+                                   ("font_big_7.png",         "assets/data.bin.20"),
+                                   ("font_big_8.png",         "assets/data.bin.34"),
+                                   ("font_big_9.png",         "assets/data.bin.21"),
+                                   ("panasonic_youth.ogg",     "assets/data.bin.36")
+                                  ]
+
+
