@@ -207,6 +207,10 @@ processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
 processLevelTransition r tex characterTex enemyTex s state = 
     case wantToChangeLevel . world $ state of
         Just name -> do nextLevel <- loadLevelByName r name tex s
+                        if name /= "level1" && name /= "menu"
+                            then do music <- loadMusic ("./assets/" ++ dname ++ ".ogg")
+                                    playMusic music
+                            else return ()
                         return state { world = mkWorld nextLevel characterTex enemyTex }
         Nothing   -> return state
 
@@ -252,13 +256,13 @@ handleInput w
 loadDigitsTextures :: SDL.Renderer -> IO DigitsTextures
 loadDigitsTextures r = mapM (loadTextureWithInfo r) $
   Map.fromList [ ('0', "assets/font_big_0.png")
-             , ('1', "assets/font_big_1.png")
-             , ('2', "assets/font_big_2.png")
-             , ('3', "assets/font_big_3.png")
-             , ('4', "assets/font_big_4.png")
-             , ('5', "assets/font_big_5.png")
-             , ('6', "assets/font_big_6.png")
-             , ('7', "assets/font_big_7.png")
-             , ('8', "assets/font_big_8.png")
-             , ('9', "assets/font_big_9.png")
-             ]
+               , ('1', "assets/font_big_1.png")
+               , ('2', "assets/font_big_2.png")
+               , ('3', "assets/font_big_3.png")
+               , ('4', "assets/font_big_4.png")
+               , ('5', "assets/font_big_5.png")
+               , ('6', "assets/font_big_6.png")
+               , ('7', "assets/font_big_7.png")
+               , ('8', "assets/font_big_8.png")
+               , ('9', "assets/font_big_9.png")
+               ]
