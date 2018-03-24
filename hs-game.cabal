@@ -38,6 +38,7 @@ executable game
                      , lens
                      , HTTP
                      , linear
+                     , random
                      , containers
                      , clock
                      , formatting

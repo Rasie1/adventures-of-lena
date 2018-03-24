@@ -21,8 +21,8 @@ applyIntent Idle      c = c
 applyIntent Stop      c = c { moving = NotMoving }
 applyIntent MoveLeft  c = c { moving = MovingLeft  }
 applyIntent MoveRight c = c { moving = MovingRight }
-applyIntent Jump      c = c { jumping = True }
-applyIntent Attack    c = c { attacking = True }
+applyIntent Jump      c = c { jumping = canJump c }
+applyIntent Attack    c = c { attacking = canAttack c }
 applyIntent Action    c = c
 applyIntent Quit      c = c
 
@@ -46,8 +46,8 @@ move dt c@Character  { moving = moving
                      , airInertia = ai
                      , moveVelocity = m } = 
     case moving of
-                MovingLeft  -> c { currentVelocity = (-m, dy) }
-                MovingRight -> c { currentVelocity = ( m, dy) }
+                MovingLeft  -> c { currentVelocity = (-m, dy), lastDirection = Types.Left }
+                MovingRight -> c { currentVelocity = ( m, dy), lastDirection = Types.Right }
                 NotMoving   -> c { currentVelocity = (dx * if falling then ai else i, dy) }
 
 

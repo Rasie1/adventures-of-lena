@@ -116,7 +116,9 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
                             then do music <- loadMusic (levelsMusic ! name)
                                     playMusic music
                             else return ()
-                        reportScore (levelName . level . world $ state) name (money . world $ state)
+                        if finishedLevel . world $ state 
+                            then reportScore (levelName . level . world $ state) name (money . world $ state)
+                            else return ()
                         return state { world = mkWorld nextLevel p1 p2 p3 p4 enemyTex
                                      , camera = Camera { cameraPosition = (0, 0)
                                                        , oldCameraEdge  = (0, 0)
@@ -128,9 +130,8 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
 
 reportScore :: String -> String -> Int -> IO ()
 reportScore from to score = 
-    do rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
-       body <- getResponseBody rsp
-       putStrLn body
+    do putStrLn $ "Sending score: " ++ show score ++ ", " ++ from ++ " -> " ++ to
+       rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
        return ()
 
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level

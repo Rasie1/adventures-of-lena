@@ -108,7 +108,10 @@ loadLevel s name t bt unitSize = Level (array ((0, 0), (levelWidth, levelHeight)
                   g i (j, tile) = ((j, i), tile)
 
 removeTile :: (Int, Int) -> Level -> Level
-removeTile pos lvl = lvl { tiles = tiles lvl // [(pos, Sky)] }
+removeTile = replaceTile Sky
+
+replaceTile :: Tile -> (Int, Int) -> Level -> Level
+replaceTile t pos lvl = lvl { tiles = tiles lvl // [(pos, t)] }
 
 getTile :: Array (Int, Int) Tile -> (Int, Int) -> Tile
 getTile a k = if inRange (bounds a) k then a ! k
@@ -154,6 +157,8 @@ toTile 'е' = Level4
 toTile 'н' = Level5
 toTile 'г' = Level6
 toTile 'ш' = Level7
+toTile ']' = Block
+toTile 'ф' = Win
 toTile _ = Sky
 
 isSolid :: Tile -> Bool
@@ -175,6 +180,7 @@ isSolid GroundGrassLeft = True
 isSolid GroundGrassRight = True
 isSolid GroundLeftBorder = True
 isSolid GroundRightBorder = True
+isSolid Block = True
 isSolid _ = False
 
 isDeadly :: Tile -> Bool

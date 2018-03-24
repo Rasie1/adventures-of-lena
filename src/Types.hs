@@ -113,6 +113,8 @@ data Tile = Sky
           | Level5
           | Level6
           | Level7
+          | Block
+          | Win
           deriving Show
 
 type DigitsTextures = Map.HashMap Char (SDL.Texture, SDL.TextureInfo)
@@ -126,6 +128,7 @@ data World = World
   , money  :: Int
   , savedWorld :: Maybe World
   , wantToChangeLevel :: Maybe String
+  , finishedLevel :: Bool
 
   , redPlayerSpriteSheet :: SpriteSheet
   , bluePlayerSpriteSheet :: SpriteSheet

@@ -9,10 +9,18 @@ import Types
 import Data.Array
 import Data.List
 import Bot
+import System.Random
 
 instance Drawable World where
-    render s c r world = do render s c r (level world)
-                            mapM_ (render s c r) (playerCharacter world : enemyCharacters world)
+    render s c r world = do shakeCamera <- if attacking . playerCharacter $ world
+                                                 then do 
+                                                         r1 <- randomRIO (0, 100) :: IO Double
+                                                         r2 <- randomRIO (0, 100) :: IO Double
+                                                         return c { cameraPosition = cameraPosition c `pointPlus` (r1 - 50, 
+                                                                                                                   r2 - 50) }
+                                                 else return c
+                            render s shakeCamera r (level world)
+                            mapM_ (render s shakeCamera r) (playerCharacter world : enemyCharacters world)
 
 
 updateWorld :: Double -> World -> World
@@ -29,6 +37,7 @@ mkWorld lvl playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePl
     , money = 0
     , savedWorld = Nothing
     , wantToChangeLevel = Nothing
+    , finishedLevel = False
     , redPlayerSpriteSheet = redPlayerSpriteSheet
     , greenPlayerSpriteSheet = greenPlayerSpriteSheet
     , bluePlayerSpriteSheet = bluePlayerSpriteSheet
@@ -59,12 +68,17 @@ processPlayerDeath w = let enemies = enemyCharacters w
 processPlayerAttacks :: World -> World
 processPlayerAttacks w = let enemies = enemyCharacters w
                              p       = playerCharacter w
+                             toCoord (x, y) = (floor x, floor y)
                              collides e = distance (currentPosition p) (currentPosition e) < (radius p + 1.0) 
                              dies e = if collides e && attacking p
                                              then Nothing
                                              else Just e 
                           in w { enemyCharacters = mapMaybe dies $ enemies
-                              , playerCharacter = p { attacking = False } }
+                               , playerCharacter = p { attacking = False }
+                               , level = foldl (\lvl pos -> replaceTile Money (toCoord pos) lvl) (level w) 
+                                       . map currentPosition 
+                                       . filter (isNothing . dies) 
+                                       $ enemies }
 
 
 processTiles :: World -> World
@@ -83,6 +97,8 @@ processTiles w =  let p = playerCharacter w
                         (Level6, _) -> w { wantToChangeLevel = Just "level6" }
                         (Level7, _) -> w { wantToChangeLevel = Just "level7" }
                         (Menu, _) -> w { wantToChangeLevel = Just "menu" }
+                        (Win, _) -> w { wantToChangeLevel = Just "menu"
+                                      , finishedLevel = True }
                         (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         (RedDye, _) -> w { playerCharacter = applyDye (redPlayerSpriteSheet w) Red (playerCharacter w) 
                                          , level = removeTile (toCoord pos) (level w) }
