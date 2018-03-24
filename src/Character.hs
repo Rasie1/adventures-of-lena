@@ -22,7 +22,9 @@ applyIntent Stop      c = c { moving = NotMoving }
 applyIntent MoveLeft  c = c { moving = MovingLeft  }
 applyIntent MoveRight c = c { moving = MovingRight }
 applyIntent Jump      c = c { jumping = canJump c }
-applyIntent Attack    c = c { attacking = canAttack c }
+applyIntent Attack    c = c { attacking = canAttack c && moving c == NotMoving
+                            , jumping = flyMode c
+                            , canJump = flyMode c }
 applyIntent Action    c = c
 applyIntent Quit      c = c
 
@@ -139,7 +141,7 @@ updateGraphics dt c@Character { moveVelocity = maxVel
                                 (-1, True, False, _) -> "FallLeft"
                                 (0,  True, False, Types.Left) -> "FallLeft"
                                 (0,  True, False, Types.Right ) -> "FallRight"
-             in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx } updated }
+             in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = if timeSinceAttack >= 0.3 then 0.1 + maxVel - abs vx else 0.1 } updated }
 
 
 attack :: DeltaTime -> Character -> Character
@@ -197,6 +199,7 @@ mkCharacter spriteSheet = Character
     , lastDirection = Types.Right
     , canAttack = False
     , timeSinceAttack = 999.0
+    , flyMode = False
 
     , characterSpriteSheet = spriteSheet
     }

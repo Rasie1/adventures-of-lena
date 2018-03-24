@@ -28,8 +28,8 @@ levelsMusic :: Map.HashMap String String
 levelsMusic = Map.fromList [ ("level1", obfuscatedStrings ! "farewell_mona_lisa.ogg"),
                              ("level2", obfuscatedStrings ! "43burnt.ogg"),
                              ("level3", obfuscatedStrings ! "black_bubblegum.ogg"),
-                             ("level4", obfuscatedStrings ! "43burnt.ogg"),
-                             ("level5", obfuscatedStrings ! "panasonic_youth.ogg"),
+                             ("level4", obfuscatedStrings ! "panasonic_youth.ogg"),
+                             ("level5", obfuscatedStrings ! "farewell_mona_lisa.ogg"),
                              ("level6", obfuscatedStrings ! "panasonic_youth.ogg"),
                              ("level7", obfuscatedStrings ! "farewell_mona_lisa.ogg")
                             ]
@@ -71,7 +71,7 @@ obfuscatedStrings = Map.fromList [ ("level1.png",             "assets/data.bin.5
                                    ("font_big_7.png",         "assets/data.bin.20"),
                                    ("font_big_8.png",         "assets/data.bin.34"),
                                    ("font_big_9.png",         "assets/data.bin.21"),
-                                   ("panasonic_youth.ogg",     "assets/data.bin.36")
+                                   ("panasonic_youth.ogg",    "assets/data.bin.36")
                                   ]
 
 
@@ -215,8 +215,8 @@ playerSprites = Map.fromList [("RunRight",
                      ("AttackLeft",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (592, 120)
-                                 , frameSize    = (52, 54)
+                                 , frameCoords  = (606, 125)
+                                 , frameSize    = (47, 53)
                                  , unitSize     = unit
                                  , gapBetweenFrames  = 0
                                  , frameChangeTime   = 0.2
@@ -226,8 +226,8 @@ playerSprites = Map.fromList [("RunRight",
                      ("AttackRight",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (0, 120)
-                                 , frameSize    = (52, 54)
+                                 , frameCoords  = (0, 125)
+                                 , frameSize    = (47, 53)
                                  , unitSize     = unit
                                  , gapBetweenFrames  = 0
                                  , frameChangeTime   = 0.2

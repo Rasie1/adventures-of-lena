@@ -35,9 +35,11 @@ data Character = Character
     , canAttack :: Bool
     , timeSinceAttack :: Double
 
+    , flyMode :: Bool
+
     , characterSpriteSheet :: SpriteSheet
     }
-data MovePosition = MovingLeft | MovingRight | NotMoving
+data MovePosition = MovingLeft | MovingRight | NotMoving deriving Eq
 
 
 type Bot = BotMemory -> World -> Character -> [Intent]
@@ -114,6 +116,8 @@ data Tile = Sky
           | Level6
           | Level7
           | Block
+          | Lava
+          | Stone
           | Win
           deriving Show
 

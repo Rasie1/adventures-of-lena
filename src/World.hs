@@ -12,12 +12,12 @@ import Bot
 import System.Random
 
 instance Drawable World where
-    render s c r world = do shakeCamera <- if attacking . playerCharacter $ world
+    render s c r world = do shakeCamera <- if (timeSinceAttack . playerCharacter $ world) < 0.1
                                                  then do 
-                                                         r1 <- randomRIO (0, 100) :: IO Double
-                                                         r2 <- randomRIO (0, 100) :: IO Double
-                                                         return c { cameraPosition = cameraPosition c `pointPlus` (r1 - 50, 
-                                                                                                                   r2 - 50) }
+                                                         r1 <- randomRIO (0, 2) :: IO Double
+                                                         r2 <- randomRIO (0, 2) :: IO Double
+                                                         return c { cameraPosition = cameraPosition c `pointPlus` (r1 - 1, 
+                                                                                                                   r2 - 1) }
                                                  else return c
                             render s shakeCamera r (level world)
                             mapM_ (render s shakeCamera r) (playerCharacter world : enemyCharacters world)
@@ -102,6 +102,8 @@ processTiles w =  let p = playerCharacter w
                         (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
                         (RedDye, _) -> w { playerCharacter = applyDye (redPlayerSpriteSheet w) Red (playerCharacter w) 
                                          , level = removeTile (toCoord pos) (level w) }
+                        (BlueDye, _) -> w { playerCharacter = applyDye (bluePlayerSpriteSheet w) Blue (playerCharacter w) 
+                                          , level = removeTile (toCoord pos) (level w) }
                         _     -> w
 
 applyDye :: SpriteSheet -> Color -> Character -> Character
@@ -110,14 +112,19 @@ applyDye s Red c = c { canAttack = True
                      , jumpPower = 1.25
                      , characterSpriteSheet = s } 
 applyDye s Green c = c
-applyDye s Blue c = c
+applyDye s Blue c = c { moveVelocity = 6
+                      , jumpPower = 0.6
+                      , canAttack = False
+                      , characterSpriteSheet = s
+                      , flyMode = True }
 applyDye _ _ c = c
 
-moneyMultiplier :: Int
-moneyMultiplier = 25
+moneyMultiplier :: String -> Int
+moneyMultiplier name = if name == "level4" then 10
+                                           else 25
 
 addMoney :: World -> World
-addMoney w = w { money = money w + moneyMultiplier }
+addMoney w = w { money = money w + moneyMultiplier (levelName . level $ w) }
 
 updateCharacters :: Double -> World -> World
 updateCharacters dt w = w { enemyCharacters = mapMaybe (updateCharacter dt w) (enemyCharacters w)
