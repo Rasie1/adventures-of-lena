@@ -212,22 +212,22 @@ playerSprites = Map.fromList [("RunRight",
                                  , timeSinceChange   = 0
                                  , reversedFrames    = True
                                  }),
-                     ("AttackRight",  
+                     ("AttackLeft",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (569, 60)
-                                 , frameSize    = (45, 54)
+                                 , frameCoords  = (550, 120)
+                                 , frameSize    = (54, 54)
                                  , unitSize     = unit
                                  , gapBetweenFrames  = 0
                                  , frameChangeTime   = 0.2
                                  , timeSinceChange   = 0
                                  , reversedFrames    = True
                                  }),
-                     ("AttackLeft",  
+                     ("AttackRight",  
                       SpriteInfo { framesCount  = 4
                                  , currentFrame = 0
-                                 , frameCoords  = (48, 60)
-                                 , frameSize    = (45, 54)
+                                 , frameCoords  = (0, 120)
+                                 , frameSize    = (54, 54)
                                  , unitSize     = unit
                                  , gapBetweenFrames  = 0
                                  , frameChangeTime   = 0.2
