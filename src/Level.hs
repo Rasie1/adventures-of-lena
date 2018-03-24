@@ -88,8 +88,8 @@ instance Drawable Level where
                     tileRect = mkRect tileX tileY width height
 
 
-loadLevel :: String -> (SDL.Texture, SDL.TextureInfo) -> (SDL.Texture, SDL.TextureInfo) -> Double -> Level
-loadLevel s t bt unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arrayElements) t bt unitSize
+loadLevel :: String -> String -> (SDL.Texture, SDL.TextureInfo) -> (SDL.Texture, SDL.TextureInfo) -> Double -> Level
+loadLevel s name t bt unitSize = Level (array ((0, 0), (levelWidth, levelHeight)) arrayElements) t bt unitSize name
             where 
                   arrayElements :: [((Int, Int), Tile)]
                   arrayElements = foldl f [] numberedRows

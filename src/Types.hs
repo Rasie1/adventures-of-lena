@@ -70,6 +70,7 @@ data Level = Level
     , levelTexture :: (SDL.Texture, SDL.TextureInfo)
     , backgroundTexture :: (SDL.Texture, SDL.TextureInfo)
     , levelUnitSize :: Double
+    , levelName :: String
     }
 
 data Tile = Sky 

@@ -36,6 +36,7 @@ executable game
                      , vector
                      , array
                      , lens
+                     , HTTP
                      , linear
                      , containers
                      , clock

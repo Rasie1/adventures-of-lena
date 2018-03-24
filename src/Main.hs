@@ -13,6 +13,7 @@ import Character
 import Rendering
 import Audio
 import Data
+import Network.HTTP
 
 import qualified SDL
 import Data.Foldable          
@@ -115,6 +116,7 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
                             then do music <- loadMusic (levelsMusic ! name)
                                     playMusic music
                             else return ()
+                        reportScore (levelName . level . world $ state) name (money . world $ state)
                         return state { world = mkWorld nextLevel p1 p2 p3 p4 enemyTex
                                      , camera = Camera { cameraPosition = (0, 0)
                                                        , oldCameraEdge  = (0, 0)
@@ -124,12 +126,19 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
                                                        } }
         Nothing   -> return state
 
+reportScore :: String -> String -> Int -> IO ()
+reportScore from to score = 
+    do rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
+       body <- getResponseBody rsp
+       putStrLn body
+       return ()
+
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
 loadLevelByName r name tilesTexture unitSize = do
       backgroundTexture <- loadTextureWithInfo r (obfuscatedStrings ! (name ++ ".png"))
       let mapPath = (obfuscatedStrings ! (name ++ ".map")) 
       levelString <- readFile mapPath
-      return (loadLevel levelString tilesTexture backgroundTexture unitSize)
+      return (loadLevel levelString name tilesTexture backgroundTexture unitSize)
 
 printDebugData :: GameState -> String
 printDebugData state = 
