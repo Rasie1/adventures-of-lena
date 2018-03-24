@@ -119,6 +119,7 @@ data Tile = Sky
           | Lava
           | Stone
           | Win
+          | Seva
           deriving Show
 
 type DigitsTextures = Map.HashMap Char (SDL.Texture, SDL.TextureInfo)

@@ -71,6 +71,7 @@ obfuscatedStrings = Map.fromList [ ("level1.png",             "assets/data.bin.5
                                    ("font_big_7.png",         "assets/data.bin.20"),
                                    ("font_big_8.png",         "assets/data.bin.34"),
                                    ("font_big_9.png",         "assets/data.bin.21"),
+                                   ("seva.png",               "assets/data.bin.39"),
                                    ("panasonic_youth.ogg",    "assets/data.bin.36"),
                                    ("4th_grade_dropout.ogg",  "assets/data.bin.37"),
                                    ("sunshine_the_werewolf.ogg", "assets/data.bin.38")

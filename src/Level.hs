@@ -60,7 +60,8 @@ instance Drawable Level where
           getTilesheetCoords GreenDye = (845, 606)
           getTilesheetCoords BlueDye = (903, 606)
           getTilesheetCoords Stone = (816, 48)
-          getTilesheetCoords _ = (432, 624)
+          getTilesheetCoords Seva = (415, 609)
+          getTilesheetCoords _ = (1068, 504)
 
           getTileSize :: (Num a) => Tile -> (a, a)
           getTileSize Menu   = (105, 109)
@@ -75,6 +76,7 @@ instance Drawable Level where
           getTileSize RedDye = (48, 53)
           getTileSize GreenDye = (48, 53)
           getTileSize BlueDye = (48, 53)
+          getTileSize Seva = (44, 63)
           getTileSize _ = (48, 48)
           getTileOffset :: (Num a) => Tile -> (a, a)
           getTileOffset Menu   = (-38, -61)
@@ -89,6 +91,7 @@ instance Drawable Level where
           getTileOffset RedDye = (0, -3)
           getTileOffset GreenDye = (0, -3)
           getTileOffset BlueDye = (0, -3)
+          getTileOffset Seva = (0, -15)
           getTileOffset _ = (0, 0)
 
           renderBackground = SDL.copy renderer 
@@ -188,6 +191,7 @@ toTile '6' = Lava
 toTile ']' = Block
 toTile 'ф' = Win
 toTile '[' = Stone
+toTile '8' = Seva
 toTile _ = Sky
 
 isSolid :: Tile -> Bool

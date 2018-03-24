@@ -104,6 +104,7 @@ processTiles w =  let p = playerCharacter w
                                          , level = removeTile (toCoord pos) (level w) }
                         (BlueDye, _) -> w { playerCharacter = applyDye (bluePlayerSpriteSheet w) Blue (playerCharacter w) 
                                           , level = removeTile (toCoord pos) (level w) }
+                        (Seva, _) -> w { level = removeTile (toCoord pos) (level w) }
                         _     -> w
 
 applyDye :: SpriteSheet -> Color -> Character -> Character
