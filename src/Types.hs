@@ -116,6 +116,8 @@ data Tile = Sky
 
 type DigitsTextures = Map.HashMap Char (SDL.Texture, SDL.TextureInfo)
 
+data Color = Red | Green | Blue | Brown
+
 data World = World
   { level :: Level
   , enemyCharacters :: [Character]
@@ -123,6 +125,10 @@ data World = World
   , money  :: Int
   , savedWorld :: Maybe World
   , wantToChangeLevel :: Maybe String
+
+  , redPlayerSpriteSheet :: SpriteSheet
+  , bluePlayerSpriteSheet :: SpriteSheet
+  , greenPlayerSpriteSheet :: SpriteSheet
   }
 
 data Camera = Camera 

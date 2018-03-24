@@ -42,17 +42,35 @@ main = withSDL $ withSDLImage $ do
       playMusic music
 
       tilesTexture <- loadTextureWithInfo r (obfuscatedStrings ! "tiles.png")
-      characterTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_brown.png")
+      playerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_brown.png")
+      redPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_red.png")
+      bluePlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_blue.png")
+      greenPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_green.png")
       enemyTexture <- loadTextureWithInfo r (obfuscatedStrings ! "enemy.png")
       digitsTexture <- loadDigitsTextures r
       initialTime <- getTime Monotonic
 
-      let characterSpriteSheet = SpriteSheet { sprites = playerSprites
+      let playerSpriteSheet = SpriteSheet { sprites = playerSprites
                                              , currentSprite       = "RunLeft"
-                                             , spriteSheetTexture  = characterTexture
+                                             , spriteSheetTexture  = playerTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
-      let enemySpriteSheet = SpriteSheet { sprites = enemySprites
+          redPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                             , currentSprite       = "RunLeft"
+                                             , spriteSheetTexture  = redPlayerTexture
+                                             , spriteSheetPosition = (0, 0)
+                                             }
+          bluePlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                             , currentSprite       = "RunLeft"
+                                             , spriteSheetTexture  = bluePlayerTexture
+                                             , spriteSheetPosition = (0, 0)
+                                             }
+          greenPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                             , currentSprite       = "RunLeft"
+                                             , spriteSheetTexture  = greenPlayerTexture
+                                             , spriteSheetPosition = (0, 0)
+                                             }
+          enemySpriteSheet = SpriteSheet { sprites = enemySprites
                                          , currentSprite       = "RunLeft"
                                          , spriteSheetTexture  = enemyTexture
                                          , spriteSheetPosition = (0, 0)
@@ -60,7 +78,11 @@ main = withSDL $ withSDLImage $ do
 
       currentLevel <- loadLevelByName r "menu" tilesTexture unit
 
-      let initialGameState = mkGameState (mkWorld currentLevel characterSpriteSheet enemySpriteSheet) initialTime digitsTexture
+      let initialGameState = mkGameState (mkWorld currentLevel playerSpriteSheet 
+                                                               redPlayerSpriteSheet
+                                                               greenPlayerSpriteSheet
+                                                               bluePlayerSpriteSheet 
+                                                               enemySpriteSheet) initialTime digitsTexture
       let updateTime time state = return state { currentTime = time }
       let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
                                      then do putStrLn $ printDebugData state
@@ -75,7 +97,7 @@ main = withSDL $ withSDLImage $ do
                         processFPS time state
                             >>= updateTime time
                             >>= updateGame (diffTime time (currentTime state))
-                            >>= processLevelTransition r tilesTexture characterSpriteSheet enemySpriteSheet unit
+                            >>= processLevelTransition r tilesTexture playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet unit
                             >>= renderFrame resolutionDouble r 
                               . updateCamera
 
@@ -84,16 +106,16 @@ main = withSDL $ withSDLImage $ do
       SDL.destroyTexture (fst tilesTexture)
 
 processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
-                  -> SpriteSheet -> SpriteSheet -> Double
-                   -> GameState -> IO GameState
-processLevelTransition r tex characterTex enemyTex s state = 
+                  -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet 
+                  -> Double -> GameState -> IO GameState
+processLevelTransition r tex p1 p2 p3 p4 enemyTex s state = 
     case wantToChangeLevel . world $ state of
         Just name -> do nextLevel <- loadLevelByName r name tex s
                         if name /= "level1" && name /= "menu"
                             then do music <- loadMusic (levelsMusic ! name)
                                     playMusic music
                             else return ()
-                        return state { world = mkWorld nextLevel characterTex enemyTex
+                        return state { world = mkWorld nextLevel p1 p2 p3 p4 enemyTex
                                      , camera = Camera { cameraPosition = (0, 0)
                                                        , oldCameraEdge  = (0, 0)
                                                        , armLength      = (0, 4)

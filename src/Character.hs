@@ -5,6 +5,7 @@ import Camera
 import Drawable
 import Types
 import Level
+import Bot
 import qualified SDL
 import Data.Array
 import SpriteSheet
@@ -172,3 +173,33 @@ instance Drawable Character where
                   pos = currentPosition character `pointPlus` (- radius character,
                                                                - radius character)
 
+mkCharacter :: SpriteSheet -> Character
+mkCharacter spriteSheet = Character 
+    { moveVelocity = 3
+    , radius       = 0.5
+    , inertia      = 0.75
+    , airInertia   = 0.99
+    , jumpPower    = 1
+
+    , currentPosition = (0, 0)
+    , currentVelocity = (0, 0)
+
+    , characterController = Controller { port = 0, actions = [], bot = Nothing }
+
+    , moving    = NotMoving
+    , falling   = True
+    , using     = False
+    , attacking = False
+
+    , jumping   = False
+    , canJump    = True
+    , timeToJump = 1.0
+    , lastDirection = Types.Right
+    , canAttack = False
+    , timeSinceAttack = 999.0
+
+    , characterSpriteSheet = spriteSheet
+    }
+
+enemy :: SpriteSheet -> Character
+enemy spriteSheet = (mkCharacter spriteSheet) { characterController = Controller { port = 1, actions = [], bot = Just simpleMoveBot } }

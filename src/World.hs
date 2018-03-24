@@ -21,20 +21,23 @@ updateWorld dt = processPlayerDeath
                . processTiles
                . updateCharacters dt
 
-mkWorld :: Level -> SpriteSheet -> SpriteSheet -> World
-mkWorld lvl playerSpriteSheet enemySpriteSheet = saveWorld World 
+mkWorld :: Level -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> World
+mkWorld lvl playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet = saveWorld World 
     { level = lvl
     , enemyCharacters = spawnEnemies
     , playerCharacter = spawnPlayer
     , money = 0
     , savedWorld = Nothing
     , wantToChangeLevel = Nothing
+    , redPlayerSpriteSheet = redPlayerSpriteSheet
+    , greenPlayerSpriteSheet = greenPlayerSpriteSheet
+    , bluePlayerSpriteSheet = bluePlayerSpriteSheet
     }
     where tileToEnemy ((x, y), Enemy) = 
                 Just ((enemy enemySpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
           tileToEnemy _ = Nothing
           tileToPlayer ((x, y), Player) = 
-                Just ((player playerSpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
+                Just ((mkCharacter playerSpriteSheet) { currentPosition = (fromIntegral x, fromIntegral y) })
           tileToPlayer _ = Nothing
           spawnEnemies = mapMaybe tileToEnemy (assocs (tiles lvl))
           spawnPlayer = head $ mapMaybe tileToPlayer (assocs (tiles lvl))
@@ -81,16 +84,18 @@ processTiles w =  let p = playerCharacter w
                         (Level7, _) -> w { wantToChangeLevel = Just "level7" }
                         (Menu, _) -> w { wantToChangeLevel = Just "menu" }
                         (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
-                        (RedDye, _) -> w { playerCharacter = applyDye RedDye (playerCharacter w) }
+                        (RedDye, _) -> w { playerCharacter = applyDye (redPlayerSpriteSheet w) Red (playerCharacter w) 
+                                         , level = removeTile (toCoord pos) (level w) }
                         _     -> w
 
-applyDye :: Tile -> Character -> Character
-applyDye RedDye c = c { canAttack = True
-                      , moveVelocity = 4.75
-                      , jumpPower = 1.25 } 
-applyDye GreenDye c = c
-applyDye BlueDye c = c
-applyDye _ c = c
+applyDye :: SpriteSheet -> Color -> Character -> Character
+applyDye s Red c = c { canAttack = True
+                     , moveVelocity = 4.75
+                     , jumpPower = 1.25
+                     , characterSpriteSheet = s } 
+applyDye s Green c = c
+applyDye s Blue c = c
+applyDye _ _ c = c
 
 moneyMultiplier :: Int
 moneyMultiplier = 25
@@ -102,34 +107,3 @@ updateCharacters :: Double -> World -> World
 updateCharacters dt w = w { enemyCharacters = mapMaybe (updateCharacter dt w) (enemyCharacters w)
                           , playerCharacter = fromJust $ updateCharacter dt w (playerCharacter w) }
 
-
-anyCharacter spriteSheet = Character 
-    { moveVelocity = 3
-    , radius       = 0.5
-    , inertia      = 0.75
-    , airInertia   = 0.99
-    , jumpPower    = 1
-
-    , currentPosition = (0, 0)
-    , currentVelocity = (0, 0)
-
-    , characterController = Controller { port = 0, actions = [], bot = Nothing }
-
-    , moving    = NotMoving
-    , falling   = True
-    , using     = False
-    , attacking = False
-
-    , jumping   = False
-    , canJump    = True
-    , timeToJump = 1.0
-    , lastDirection = Types.Right
-    , canAttack = False
-    , timeSinceAttack = 999.0
-
-    , characterSpriteSheet = spriteSheet
-    }
-
-player = anyCharacter
-
-enemy spriteSheet = (anyCharacter spriteSheet) { characterController = Controller { port = 1, actions = [], bot = Just simpleMoveBot } }
