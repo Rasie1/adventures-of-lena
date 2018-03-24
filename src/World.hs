@@ -17,6 +17,7 @@ instance Drawable World where
 
 updateWorld :: Double -> World -> World
 updateWorld dt = processPlayerDeath
+               . processPlayerAttacks
                . processTiles
                . updateCharacters dt
 
@@ -52,6 +53,15 @@ processPlayerDeath w = let enemies = enemyCharacters w
                            collides e = distance (currentPosition p) (currentPosition e) < (radius p{- + radius e-})
                         in if or . map collides $ enemies then loadWorld w
                                                           else w
+processPlayerAttacks :: World -> World
+processPlayerAttacks w = let enemies = enemyCharacters w
+                             p       = playerCharacter w
+                             collides e = distance (currentPosition p) (currentPosition e) < (radius p + 1.0) 
+                             dies e = if collides e && attacking p
+                                             then Nothing
+                                             else Just e 
+                          in w { enemyCharacters = mapMaybe dies $ enemies
+                              , playerCharacter = p { attacking = False } }
 
 
 processTiles :: World -> World
@@ -71,7 +81,16 @@ processTiles w =  let p = playerCharacter w
                         (Level7, _) -> w { wantToChangeLevel = Just "level7" }
                         (Menu, _) -> w { wantToChangeLevel = Just "menu" }
                         (Money, _) -> addMoney w { level = removeTile (toCoord pos) (level w) }
+                        (RedDye, _) -> w { playerCharacter = applyDye RedDye (playerCharacter w) }
                         _     -> w
+
+applyDye :: Tile -> Character -> Character
+applyDye RedDye c = c { canAttack = True
+                      , moveVelocity = 4.75
+                      , jumpPower = 1.25 } 
+applyDye GreenDye c = c
+applyDye BlueDye c = c
+applyDye _ c = c
 
 moneyMultiplier :: Int
 moneyMultiplier = 25
@@ -104,6 +123,9 @@ anyCharacter spriteSheet = Character
     , jumping   = False
     , canJump    = True
     , timeToJump = 1.0
+    , lastDirection = Types.Right
+    , canAttack = False
+    , timeSinceAttack = 999.0
 
     , characterSpriteSheet = spriteSheet
     }

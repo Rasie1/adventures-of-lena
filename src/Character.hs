@@ -119,19 +119,31 @@ characterGravity = 0.3
 
 updateGraphics :: DeltaTime -> Character -> Character
 updateGraphics dt c@Character { moveVelocity = maxVel
-                              , falling      = isFalling
+                              , falling      = falling
+                              , attacking    = attacking
+                              , timeSinceAttack = timeSinceAttack
+                              , lastDirection   = lastDirection
                               , currentVelocity = (vx, _)
                               , characterSpriteSheet = s } = 
     c { characterSpriteSheet = 
             let updated = updateSpriteSheet dt (updateState newState s)
-                newState = case (signum (round vx), isFalling) of 
-                                (1,  False) -> "RunRight"
-                                (0,  False) -> "Stand"
-                                (-1, False) -> "RunLeft" 
-                                (1,  True) -> "FallRight"
-                                (0,  True) -> "FallRight"
-                                (-1, True) -> "FallLeft"
+                newState = case (signum (round vx), falling, timeSinceAttack < 0.3, lastDirection) of 
+                                (_, _, True, Types.Left) -> "AttackLeft"
+                                (_, _, True, Types.Right) -> "AttackRight"
+                                (1,  False, False, _) -> "RunRight"
+                                (-1, False, False, _) -> "RunLeft" 
+                                (0,  False, False, Types.Left) -> "StandLeft"
+                                (0,  False, False, Types.Right) -> "StandRight"
+                                (1,  True, False, _) -> "FallRight"
+                                (-1, True, False, _) -> "FallLeft"
+                                (0,  True, False, Types.Left) -> "FallLeft"
+                                (0,  True, False, Types.Right ) -> "FallRight"
              in updateCurrentSprite (getCurrentSprite updated) { frameChangeTime = 0.1 + maxVel - abs vx } updated }
+
+
+attack :: DeltaTime -> Character -> Character
+attack dt c = c { timeSinceAttack = if attacking c then 0 
+                                                   else timeSinceAttack c + dt }
 
 updateCharacter :: DeltaTime -> World -> Character -> Maybe Character
 updateCharacter dt world ch = Just 
@@ -140,7 +152,7 @@ updateCharacter dt world ch = Just
                            . updatePosition dt
                            . fall world
                            -- . activate world
-                           -- . attack world
+                           . attack dt
                            . jump 
                            . move dt
                            . applyBot BotMemory world 

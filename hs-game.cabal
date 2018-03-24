@@ -21,6 +21,7 @@ executable game
                        Character
                        Rendering
                        Types
+                       Data
                        Counter
                        Bot
                        SpriteSheet

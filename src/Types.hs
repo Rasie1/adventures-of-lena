@@ -31,6 +31,9 @@ data Character = Character
     , jumping   :: Bool
     , canJump   :: Bool
     , timeToJump :: Double
+    , lastDirection :: Direction
+    , canAttack :: Bool
+    , timeSinceAttack :: Double
 
     , characterSpriteSheet :: SpriteSheet
     }

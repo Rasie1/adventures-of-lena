@@ -23,6 +23,7 @@ keyEventToIntent (SDL.KeyboardEventData _ SDL.Pressed _ keysym) =
     SDL.KeycodeA      -> MoveLeft
     SDL.KeycodeS      -> Idle
     SDL.KeycodeD      -> MoveRight
+    SDL.KeycodeE      -> Attack
     SDL.KeycodeUp     -> Jump
     SDL.KeycodeLeft   -> MoveLeft
     SDL.KeycodeDown   -> Idle

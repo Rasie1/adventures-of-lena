@@ -54,6 +54,7 @@ instance Drawable Level where
           getTilesheetCoords Level6 = (110, 550)
           getTilesheetCoords Level7 = (110, 550)
           getTilesheetCoords Money = (960, 96)
+          getTilesheetCoords RedDye = (960, 96)
           getTilesheetCoords _ = (432, 624)
 
           getTileSize :: (Num a) => Tile -> (a, a)
