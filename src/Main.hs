@@ -24,17 +24,12 @@ import Data.HashMap.Strict ((!))
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
 
-screenx :: Int
-screenx = 1280
-screeny :: Int
-screeny = 960
-resolution :: (Int, Int)
-resolution = (screenx, screeny)
-resolutionDouble :: (Double, Double)
-resolutionDouble = (fromIntegral screenx, fromIntegral screeny)
 
 main :: IO ()
 main = withSDL $ withSDLImage $ do
+  let resolution = (1200, 700)
+  let resolutionDouble :: ScreenSize
+      resolutionDouble = (fromIntegral (fst resolution), fromIntegral (snd resolution))
   setHintQuality
   withWindow "Game" resolution $ \w -> do
     withRenderer w $ \r -> do
@@ -52,26 +47,26 @@ main = withSDL $ withSDLImage $ do
       initialTime <- getTime Monotonic
 
       let playerSpriteSheet = SpriteSheet { sprites = playerSprites
-                                             , currentSprite       = "RunLeft"
-                                             , spriteSheetTexture  = playerTexture
-                                             , spriteSheetPosition = (0, 0)
-                                             }
-          redPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                          , currentSprite       = "RunLeft"
+                                          , spriteSheetTexture  = playerTexture
+                                          , spriteSheetPosition = (0, 0)
+                                          }
+      let redPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
                                              , currentSprite       = "RunLeft"
                                              , spriteSheetTexture  = redPlayerTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
-          bluePlayerSpriteSheet = SpriteSheet { sprites = playerSprites
-                                             , currentSprite       = "RunLeft"
-                                             , spriteSheetTexture  = bluePlayerTexture
-                                             , spriteSheetPosition = (0, 0)
-                                             }
-          greenPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+      let bluePlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                              , currentSprite       = "RunLeft"
+                                              , spriteSheetTexture  = bluePlayerTexture
+                                              , spriteSheetPosition = (0, 0)
+                                              }
+      let greenPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
                                              , currentSprite       = "RunLeft"
                                              , spriteSheetTexture  = greenPlayerTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
-          enemySpriteSheet = SpriteSheet { sprites = enemySprites
+      let enemySpriteSheet = SpriteSheet { sprites = enemySprites
                                          , currentSprite       = "RunLeft"
                                          , spriteSheetTexture  = enemyTexture
                                          , spriteSheetPosition = (0, 0)
@@ -122,9 +117,9 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
                         return state { world = mkWorld nextLevel p1 p2 p3 p4 enemyTex
                                      , camera = Camera { cameraPosition = (0, 0)
                                                        , oldCameraEdge  = (0, 0)
-                                                       , armLength      = (0, 4)
+                                                       , armLength      = (0, 2)
                                                        , oldPivot       = (0, 0)
-                                                       , pivotOffset    = (0, -2)
+                                                       , pivotOffset    = (0, -1)
                                                        } }
         Nothing   -> return state
 
