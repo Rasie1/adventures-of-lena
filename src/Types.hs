@@ -5,8 +5,14 @@ import System.Clock
 import qualified SDL
 import Data.Text
 import qualified Data.HashMap.Strict as Map
+import Network.URI
 
 type ScreenSize = (Double, Double)
+type ScoresServerURI = URI
+
+data Config = Config ScreenSize ScoresServerURI
+    deriving Show
+
 type Position = (Double, Double)
 type Velocity = (Double, Double)
 type DeltaTime = Double

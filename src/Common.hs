@@ -54,3 +54,6 @@ distance a b = sqrt (distanceSqr a b)
 
 getTextureSize :: SDL.TextureInfo -> SDL.V2 CInt
 getTextureSize ti = SDL.V2 (SDL.textureWidth ti)  (SDL.textureHeight ti)
+
+floorTuple :: (Double, Double) -> (Int, Int)
+floorTuple (x, y) = (floor x, floor y)

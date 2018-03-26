@@ -14,6 +14,7 @@ import Rendering
 import Audio
 import Data
 import Network.HTTP
+import Config
 
 import qualified SDL
 import Data.Foldable          
@@ -24,82 +25,79 @@ import Data.HashMap.Strict ((!))
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
 
-
 main :: IO ()
 main = withSDL $ withSDLImage $ do
-  let resolution = (1200, 700)
-  let resolutionDouble :: ScreenSize
-      resolutionDouble = (fromIntegral (fst resolution), fromIntegral (snd resolution))
   setHintQuality
-  withWindow "Game" resolution $ \w -> do
-    withRenderer w $ \r -> do
-      initAudio
-      music <- loadMusic (obfuscatedStrings ! "farewell_mona_lisa.ogg")
-      playMusic music
+  withConfig $ \(Config res scoreUrl) -> do
+    withWindow "Game" (floorTuple res) $ \w -> do
+        withRenderer w $ \r -> do
+          initAudio
+          music <- loadMusic (obfuscatedStrings ! "farewell_mona_lisa.ogg")
+          playMusic music
 
-      tilesTexture <- loadTextureWithInfo r (obfuscatedStrings ! "tiles.png")
-      playerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_brown.png")
-      redPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_red.png")
-      bluePlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_blue.png")
-      greenPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_green.png")
-      enemyTexture <- loadTextureWithInfo r (obfuscatedStrings ! "enemy.png")
-      digitsTexture <- loadDigitsTextures r
-      initialTime <- getTime Monotonic
+          tilesTexture <- loadTextureWithInfo r (obfuscatedStrings ! "tiles.png")
+          playerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_brown.png")
+          redPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_red.png")
+          bluePlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_blue.png")
+          greenPlayerTexture <- loadTextureWithInfo r (obfuscatedStrings ! "lena_green.png")
+          enemyTexture <- loadTextureWithInfo r (obfuscatedStrings ! "enemy.png")
+          digitsTexture <- loadDigitsTextures r
+          initialTime <- getTime Monotonic
 
-      let playerSpriteSheet = SpriteSheet { sprites = playerSprites
-                                          , currentSprite       = "RunLeft"
-                                          , spriteSheetTexture  = playerTexture
-                                          , spriteSheetPosition = (0, 0)
-                                          }
-      let redPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
-                                             , currentSprite       = "RunLeft"
-                                             , spriteSheetTexture  = redPlayerTexture
-                                             , spriteSheetPosition = (0, 0)
-                                             }
-      let bluePlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+          let playerSpriteSheet = SpriteSheet { sprites = playerSprites
                                               , currentSprite       = "RunLeft"
-                                              , spriteSheetTexture  = bluePlayerTexture
+                                              , spriteSheetTexture  = playerTexture
                                               , spriteSheetPosition = (0, 0)
                                               }
-      let greenPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+          let redPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                                 , currentSprite       = "RunLeft"
+                                                 , spriteSheetTexture  = redPlayerTexture
+                                                 , spriteSheetPosition = (0, 0)
+                                                 }
+          let bluePlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                                  , currentSprite       = "RunLeft"
+                                                  , spriteSheetTexture  = bluePlayerTexture
+                                                  , spriteSheetPosition = (0, 0)
+                                                  }
+          let greenPlayerSpriteSheet = SpriteSheet { sprites = playerSprites
+                                                 , currentSprite       = "RunLeft"
+                                                 , spriteSheetTexture  = greenPlayerTexture
+                                                 , spriteSheetPosition = (0, 0)
+                                                 }
+          let enemySpriteSheet = SpriteSheet { sprites = enemySprites
                                              , currentSprite       = "RunLeft"
-                                             , spriteSheetTexture  = greenPlayerTexture
+                                             , spriteSheetTexture  = enemyTexture
                                              , spriteSheetPosition = (0, 0)
                                              }
-      let enemySpriteSheet = SpriteSheet { sprites = enemySprites
-                                         , currentSprite       = "RunLeft"
-                                         , spriteSheetTexture  = enemyTexture
-                                         , spriteSheetPosition = (0, 0)
-                                         }
 
-      currentLevel <- loadLevelByName r "menu" tilesTexture unit
+          currentLevel <- loadLevelByName r "menu" tilesTexture unit
 
-      let initialGameState = mkGameState (mkWorld currentLevel playerSpriteSheet 
-                                                               redPlayerSpriteSheet
-                                                               greenPlayerSpriteSheet
-                                                               bluePlayerSpriteSheet 
-                                                               enemySpriteSheet) initialTime digitsTexture
-      let updateTime time state = return state { currentTime = time }
-      let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
-                                     then do putStrLn $ printDebugData state
-                                             return state { framesSinceLastFPSPrint = 0
-                                                          , lastFPSPrintTime = time }
-                                     else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }
+          let initialGameState = mkGameState (mkWorld currentLevel playerSpriteSheet 
+                                                                   redPlayerSpriteSheet
+                                                                   greenPlayerSpriteSheet
+                                                                   bluePlayerSpriteSheet 
+                                                                   enemySpriteSheet) initialTime digitsTexture
+          let updateTime time state = return state { currentTime = time }
+          let processFPS time state = if diffTime time (lastFPSPrintTime state) > 1.0
+                                         then do putStrLn $ printDebugData state
+                                                 return state { framesSinceLastFPSPrint = 0
+                                                              , lastFPSPrintTime = time }
+                                         else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }
 
 
 
-      let update x = do time <- getTime Monotonic
-                        state <- handleInput x <$> SDL.pollEvents
-                        processFPS time state
-                            >>= updateTime time
-                            >>= updateGame (diffTime time (currentTime state))
-                            >>= processLevelTransition r tilesTexture playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet unit
-                            >>= renderFrame resolutionDouble r 
-                              . updateCamera
+          let update x = do time <- getTime Monotonic
+                            state <- handleInput x <$> SDL.pollEvents
+                            processFPS time state
+                                >>= updateTime time
+                                >>= updateGame (diffTime time (currentTime state))
+                                >>= processLevelTransition r tilesTexture playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet unit
+                                >>= renderFrame res r 
+                                  . updateCamera
 
-      runApp update initialGameState
+          runApp update initialGameState
 
-      SDL.destroyTexture (fst tilesTexture)
+          SDL.destroyTexture (fst tilesTexture)
 
 processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
                   -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet 
