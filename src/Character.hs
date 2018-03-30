@@ -111,14 +111,14 @@ updateCollisions dt World { level = Level { tiles = t } }
 
 
 
-fall :: World -> Character -> Character
-fall World { level = Level { tiles = t } }
+fall :: DeltaTime -> World -> Character -> Character
+fall dt World { level = Level { tiles = t } }
         c@Character { radius = r
                     , falling = isFalling
                     , currentVelocity = (dx, dy) } = 
-    c { currentVelocity = (dx, dy + characterGravity) } 
+    c { currentVelocity = (dx, dy + characterGravity * dt) } 
 
-characterGravity = 0.3
+characterGravity = 0.3 / 0.0166
 
 updateGraphics :: DeltaTime -> Character -> Character
 updateGraphics dt c@Character { moveVelocity = maxVel
@@ -153,7 +153,7 @@ updateCharacter dt world ch = Just
                            . updateGraphics dt
                            . updateCollisions dt world
                            . updatePosition dt
-                           . fall world
+                           . fall dt world
                            -- . activate world
                            . attack dt
                            . jump 

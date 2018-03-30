@@ -87,7 +87,7 @@ main = withSDL $ withSDLImage $ do
 
 
           let update x = do time <- getTime Monotonic
-                            state <- handleInput x <$> SDL.pollEvents
+                            state <- handleInput applyIntent x <$> SDL.pollEvents
                             processFPS time state
                                 >>= updateTime time
                                 >>= updateGame (diffTime time (currentTime state))
@@ -147,11 +147,3 @@ repeatUntil f p = go
 
 updateGame :: DeltaTime -> GameState -> IO GameState
 updateGame dt state = return state { world = updateWorld dt $ world state }
-
-applyIntentToGameState :: Intent -> GameState -> GameState
-applyIntentToGameState i state = 
-    state { world = (world state) { playerCharacter = applyIntent i . playerCharacter . world $ state } }
-
-handleInput :: GameState -> [SDL.Event] -> GameState
-handleInput w
-  = foldl' (flip applyIntentToGameState) w . fmap (payloadToIntent . SDL.eventPayload)

@@ -9,6 +9,7 @@ import Control.Monad (void)
 import Network.URI
 import Types
 import Common
+import Control.Monad.IO.Class (MonadIO)
 
 instance FromJSON Config where
     parseJSON (Object values) = do

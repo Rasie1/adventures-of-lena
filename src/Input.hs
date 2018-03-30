@@ -2,6 +2,7 @@ module Input where
 
 import qualified SDL
 import Types
+import Data.List
 
 payloadToIntent :: SDL.EventPayload -> Intent
 payloadToIntent SDL.QuitEvent            = Quit
@@ -53,3 +54,13 @@ buttonIntent _ = Idle
 --     t = if SDL.mouseButtonEventMotion e == SDL.Pressed
 --            then Press
 --            else Release
+
+type InputHandler = (Intent -> Character -> Character) 
+
+applyIntentToGameState :: InputHandler -> Intent -> GameState -> GameState
+applyIntentToGameState applyIntent i state = 
+    state { world = (world state) { playerCharacter = applyIntent i . playerCharacter . world $ state } }
+
+handleInput :: InputHandler -> GameState -> [SDL.Event] -> GameState
+handleInput applyIntent w
+  = foldl' (flip (applyIntentToGameState applyIntent)) w . fmap (payloadToIntent . SDL.eventPayload)
