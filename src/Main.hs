@@ -14,6 +14,7 @@ import Rendering
 import Audio
 import Data
 import Network.HTTP
+import Network.URI
 import Config
 
 import qualified SDL
@@ -21,6 +22,7 @@ import Data.Foldable
 import Control.Monad
 import System.Clock
 import Data.HashMap.Strict ((!))
+import Control.Exception   (catch, SomeException)
 
 diffTime :: TimeSpec -> TimeSpec -> DeltaTime
 diffTime end start = (* 1e-9) $ fromIntegral $ toNanoSecs end - toNanoSecs  start
@@ -83,6 +85,25 @@ main = withSDL $ withSDLImage $ do
                                                  return state { framesSinceLastFPSPrint = 0
                                                               , lastFPSPrintTime = time }
                                          else return state { framesSinceLastFPSPrint = framesSinceLastFPSPrint state + 1 }
+          let processLevelTransition :: GameState -> IO GameState
+              processLevelTransition state = 
+                    case wantToChangeLevel . world $ state of
+                        Just name -> do nextLevel <- loadLevelByName r name tilesTexture unit
+                                        if name /= "level1" && name /= "menu"
+                                            then do music <- loadMusic (levelsMusic ! name)
+                                                    playMusic music
+                                            else return ()
+                                        if finishedLevel . world $ state 
+                                            then reportScore scoreUrl (levelName . level . world $ state) name (money . world $ state)
+                                            else return ()
+                                        return state { world = mkWorld nextLevel playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet
+                                                     , camera = Camera { cameraPosition = (0, 0)
+                                                                       , oldCameraEdge  = (0, 0)
+                                                                       , armLength      = (0, 2)
+                                                                       , oldPivot       = (0, 0)
+                                                                       , pivotOffset    = (0, -1)
+                                                                       } }
+                        Nothing   -> return state
 
 
 
@@ -91,7 +112,7 @@ main = withSDL $ withSDLImage $ do
                             processFPS time state
                                 >>= updateTime time
                                 >>= updateGame (diffTime time (currentTime state))
-                                >>= processLevelTransition r tilesTexture playerSpriteSheet redPlayerSpriteSheet greenPlayerSpriteSheet bluePlayerSpriteSheet enemySpriteSheet unit
+                                >>= processLevelTransition
                                 >>= renderFrame res r 
                                   . updateCamera
 
@@ -100,33 +121,15 @@ main = withSDL $ withSDLImage $ do
           SDL.destroyTexture (fst tilesTexture)
 
 
-reportScore :: String -> String -> Int -> IO ()
-reportScore from to score = 
+reportScore :: Network.URI.URI -> String -> String -> Int -> IO ()
+reportScore url from to score = 
     do putStrLn $ "Sending score: " ++ show score ++ ", " ++ from ++ " -> " ++ to
-       rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
-       return ()
+       let fullUri = show url ++ "?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to
+       putStrLn ("Requesting " ++ show url)
+       catch (do result <- Network.HTTP.simpleHTTP (getRequest (fullUri))
+                 return ())
+             (\e -> putStrLn ("Error sending scores! Error: " ++ show (e :: SomeException)))
 
-processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
-                  -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet 
-                  -> Double -> GameState -> IO GameState
-processLevelTransition r tex p1 p2 p3 p4 enemyTex s state = 
-    case wantToChangeLevel . world $ state of
-        Just name -> do nextLevel <- loadLevelByName r name tex s
-                        if name /= "level1" && name /= "menu"
-                            then do music <- loadMusic (levelsMusic ! name)
-                                    playMusic music
-                            else return ()
-                        if finishedLevel . world $ state 
-                            then reportScore (levelName . level . world $ state) name (money . world $ state)
-                            else return ()
-                        return state { world = mkWorld nextLevel p1 p2 p3 p4 enemyTex
-                                     , camera = Camera { cameraPosition = (0, 0)
-                                                       , oldCameraEdge  = (0, 0)
-                                                       , armLength      = (0, 2)
-                                                       , oldPivot       = (0, 0)
-                                                       , pivotOffset    = (0, -1)
-                                                       } }
-        Nothing   -> return state
 
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
 loadLevelByName r name tilesTexture unitSize = do
