@@ -94,11 +94,14 @@ instance Drawable Level where
           getTileOffset Seva = (0, -15)
           getTileOffset _ = (0, 0)
 
+          screenx = round $ fst screen
+          screeny = round $ snd screen
+
           renderBackground = SDL.copy renderer 
                                       btexture 
                                       (Just (mkRect 0 0 (SDL.textureWidth bti) 
                                                         (SDL.textureHeight bti)))
-                                      (Just (mkRect 0 0 1280 960))
+                                      (Just (mkRect 0 0 screenx screeny))
 
           renderTile x y t
             = if shouldCull then return ()

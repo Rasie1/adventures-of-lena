@@ -99,6 +99,13 @@ main = withSDL $ withSDLImage $ do
 
           SDL.destroyTexture (fst tilesTexture)
 
+
+reportScore :: String -> String -> Int -> IO ()
+reportScore from to score = 
+    do putStrLn $ "Sending score: " ++ show score ++ ", " ++ from ++ " -> " ++ to
+       rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
+       return ()
+
 processLevelTransition :: SDL.Renderer -> (SDL.Texture, SDL.TextureInfo)
                   -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet -> SpriteSheet 
                   -> Double -> GameState -> IO GameState
@@ -120,12 +127,6 @@ processLevelTransition r tex p1 p2 p3 p4 enemyTex s state =
                                                        , pivotOffset    = (0, -1)
                                                        } }
         Nothing   -> return state
-
-reportScore :: String -> String -> Int -> IO ()
-reportScore from to score = 
-    do putStrLn $ "Sending score: " ++ show score ++ ", " ++ from ++ " -> " ++ to
-       rsp <- Network.HTTP.simpleHTTP (getRequest ("http://kvachev.com/aol.php?score=" ++ show score ++ "&from=" ++ from ++ "&to=" ++ to))
-       return ()
 
 loadLevelByName :: SDL.Renderer -> String -> (SDL.Texture, SDL.TextureInfo) -> Double -> IO Level
 loadLevelByName r name tilesTexture unitSize = do

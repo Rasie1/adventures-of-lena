@@ -6,8 +6,6 @@ import Data.List
 
 payloadToIntent :: SDL.EventPayload -> Intent
 payloadToIntent SDL.QuitEvent            = Quit
-payloadToIntent (SDL.MouseMotionEvent e) = motionIntent e
-payloadToIntent (SDL.MouseButtonEvent e) = buttonIntent e
 payloadToIntent (SDL.KeyboardEvent k)    = keyEventToIntent k
 payloadToIntent _                        = Idle
 
@@ -33,27 +31,6 @@ keyEventToIntent (SDL.KeyboardEventData _ SDL.Pressed _ keysym) =
     SDL.KeycodeLCtrl  -> Attack
     SDL.KeycodeRCtrl  -> Attack
     _                 -> Idle
-
-
-motionIntent :: SDL.MouseMotionEventData -> Intent
-motionIntent _ = Idle
--- motionIntent e = Hover q
---   where
---     q = selectQuadrant x y
---     (SDL.P (SDL.V2 x y)) = SDL.mouseMotionEventPos e
-
-
-  -- | SDL.mouseButtonEventMotion e == SDL.Pressed -> Down
-  --
-buttonIntent :: SDL.MouseButtonEventData -> Intent
-buttonIntent _ = Idle
--- buttonIntent e = t q
---   where
---     q = selectQuadrant x y
---     (SDL.P (SDL.V2 x y)) = SDL.mouseButtonEventPos e
---     t = if SDL.mouseButtonEventMotion e == SDL.Pressed
---            then Press
---            else Release
 
 type InputHandler = (Intent -> Character -> Character) 
 
