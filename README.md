@@ -1,7 +1,7 @@
 # Adventures of Lena
 
 This is a platformer game written for my girlfriend's birthday using Haskell and SDL2.
-Upon completing each level, score was sent to my server. After that, I sent the score to her bank account :) (server url in config is wrong)
+Upon completing each level, score was sent to my server. After that, I sent the score to her bank account :)
 
 
 # Install
